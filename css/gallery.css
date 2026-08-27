@@ -1,0 +1,64 @@
+/* GALLERY */
+        #gallery {
+            background: var(--paper);
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 0.9rem;
+        }
+        .gallery-item {
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            aspect-ratio: 4/5;
+            position: relative;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition);
+        }
+        .gallery-item:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        .gallery-item-inner {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .gallery-item-inner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: grayscale(75%) contrast(1.02);
+            transform: scale(1.02);
+            transition: filter 0.5s var(--transition), transform 0.5s var(--transition);
+        }
+        .gallery-item:hover .gallery-item-inner img {
+            filter: grayscale(0%) contrast(1.02);
+            transform: scale(1.08);
+        }
+        .gallery-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(28, 24, 21, 0.82) 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 1.1rem 1.2rem;
+        }
+        .gallery-overlay span {
+            color: var(--parchment);
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: var(--font-display);
+            position: relative;
+            padding-left: 0.9rem;
+        }
+        .gallery-overlay span::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.15em;
+            bottom: 0.15em;
+            width: 2px;
+            background: var(--oak);
+        }

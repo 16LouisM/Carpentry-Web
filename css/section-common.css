@@ -1,0 +1,40 @@
+/* SECTIONS - shared */
+        section {
+            padding: 5.5rem 2rem;
+        }
+        .section-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--oak-deep);
+            margin-bottom: 0.9rem;
+        }
+        .section-label::before {
+            content: '';
+            width: 28px;
+            height: 1.5px;
+            background: var(--oak);
+            display: inline-block;
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            color: var(--charcoal);
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            color: var(--umber-mid);
+            max-width: 600px;
+            font-size: 1.05rem;
+            margin-bottom: 3rem;
+        }

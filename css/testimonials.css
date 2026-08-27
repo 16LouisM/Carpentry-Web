@@ -1,0 +1,67 @@
+/* TESTIMONIALS */
+        #testimonials {
+            background: var(--parchment);
+        }
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.4rem;
+        }
+        .testimonial-card {
+            background: var(--paper);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--line);
+            position: relative;
+        }
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 0.3rem;
+            left: 1.4rem;
+            font-size: 4.5rem;
+            color: rgba(184, 124, 76, 0.18);
+            font-family: var(--font-display);
+            line-height: 1;
+            pointer-events: none;
+        }
+        .testimonial-card p {
+            color: var(--umber-mid);
+            font-style: italic;
+            margin-bottom: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .testimonial-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            background: var(--charcoal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--brass);
+            font-weight: 600;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+        .testimonial-author strong {
+            display: block;
+            color: var(--charcoal);
+            font-size: 0.95rem;
+            font-family: var(--font-display);
+        }
+        .testimonial-author small {
+            color: var(--umber-mid);
+            font-size: 0.8rem;
+        }
+        .stars {
+            color: var(--oak-deep);
+            letter-spacing: 2px;
+        }

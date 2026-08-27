@@ -1,0 +1,103 @@
+/* CONTACT */
+        #contact {
+            background: var(--paper);
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 3rem;
+            align-items: start;
+        }
+        .contact-info h3 {
+            font-family: var(--font-display);
+            color: var(--charcoal);
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+        .contact-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+            color: var(--umber-mid);
+        }
+        .contact-detail .cd-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--parchment);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+        .contact-form {
+            background: var(--parchment);
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--parchment-deep);
+        }
+        .contact-form h3 {
+            font-family: var(--font-display);
+            color: var(--charcoal);
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            font-family: var(--font-mono);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.4rem;
+            color: var(--umber-mid);
+            font-size: 0.72rem;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1.5px solid var(--parchment-deep);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            background: var(--paper);
+            transition: var(--transition);
+            color: var(--umber);
+            resize: vertical;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--oak);
+            box-shadow: 0 0 0 4px rgba(184, 124, 76, 0.14);
+        }
+        .form-group textarea {
+            min-height: 120px;
+        }
+        .form-submit {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1rem;
+        }
+        .form-success {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: #3A7D44;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .form-success.show {
+            display: block;
+        }
+        .form-fields.hide {
+            display: none;
+        }

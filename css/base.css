@@ -1,0 +1,48 @@
+:root {
+            /* Workshop palette - grounded in real timber & hardware tones */
+            --charcoal: #1C1815;       /* dark walnut-charcoal, hero/footer */
+            --charcoal-soft: #2A241F;
+            --umber: #2A1F16;          /* body text */
+            --umber-mid: #5E4A38;      /* secondary text */
+            --oak: #B87C4C;            /* primary accent - raw oak */
+            --oak-deep: #96602F;
+            --brass: #C9A063;          /* hardware accent */
+            --parchment: #F1E9D8;      /* sawdust parchment */
+            --parchment-deep: #E8DBC3;
+            --paper: #FBF7EF;          /* near-white panel background */
+            --line: rgba(42, 31, 22, 0.14);
+            --shadow-sm: 0 2px 10px rgba(28, 24, 21, 0.10);
+            --shadow-md: 0 6px 24px rgba(28, 24, 21, 0.14);
+            --shadow-lg: 0 14px 44px rgba(28, 24, 21, 0.20);
+            --radius-sm: 3px;
+            --radius: 5px;
+            --radius-lg: 8px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-display: 'Zilla Slab', 'Georgia', serif;
+            --font-body: 'Work Sans', 'Segoe UI', system-ui, sans-serif;
+            --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--paper);
+            color: var(--umber);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: var(--oak);
+            color: #fff;
+        }

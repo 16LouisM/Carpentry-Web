@@ -1,0 +1,21 @@
+{
+  "name": "modjadji-projects",
+  "version": "1.0.0",
+  "description": "Modjadji Projects carpentry and joinery website",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "keywords": [
+    "carpentry",
+    "joinery",
+    "woodwork",
+    "modjadji-projects"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "nodemailer": "^9.0.5"
+  }
+}

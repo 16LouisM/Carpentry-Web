@@ -1,0 +1,51 @@
+/* SERVICES */
+        #services {
+            background: var(--parchment);
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+        .service-card {
+            background: var(--paper);
+            padding: 2.1rem 1.8rem 1.8rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid var(--line);
+            border-top: 4px solid var(--oak);
+            text-align: left;
+            position: relative;
+        }
+        .service-card:nth-of-type(2) { border-top-color: #7A5233; }  /* walnut */
+        .service-card:nth-of-type(3) { border-top-color: #C9A063; }  /* brass/pine */
+        .service-card:nth-of-type(4) { border-top-color: #8C6239; }  /* teak */
+        .service-card:nth-of-type(5) { border-top-color: #A8794A; }  /* cedar */
+        .service-card:nth-of-type(6) { border-top-color: #5E4A38; }  /* ash-dark */
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .service-icon {
+            width: 52px;
+            height: 52px;
+            background: var(--parchment);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.2rem;
+            font-size: 1.5rem;
+        }
+        .service-card h3 {
+            font-family: var(--font-display);
+            font-weight: 600;
+            color: var(--charcoal);
+            margin-bottom: 0.6rem;
+            font-size: 1.2rem;
+        }
+        .service-card p {
+            color: var(--umber-mid);
+            font-size: 0.95rem;
+        }

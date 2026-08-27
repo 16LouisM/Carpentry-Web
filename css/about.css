@@ -1,0 +1,74 @@
+/* ABOUT */
+        #about {
+            background: var(--paper);
+        }
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3.5rem;
+            align-items: center;
+        }
+        .about-image {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: var(--charcoal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+        }
+        .about-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .about-text h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--charcoal);
+            margin-bottom: 0.8rem;
+        }
+        .about-text p {
+            color: var(--umber-mid);
+            margin-bottom: 1rem;
+        }
+        .stats-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2.2rem;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center;
+            background: var(--parchment);
+            padding: 1.3rem 1.5rem;
+            border-radius: 50%;
+            aspect-ratio: 1;
+            width: 108px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--parchment-deep);
+            box-shadow: inset 0 0 0 6px var(--paper), inset 0 0 0 7px var(--parchment-deep);
+        }
+        .stat-number {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--oak-deep);
+            display: block;
+            line-height: 1.1;
+        }
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--umber-mid);
+            font-weight: 500;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-top: 0.2rem;
+        }
