@@ -1,46 +1,105 @@
-        // ── CONTACT FORM ──
-        const formFields = document.getElementById('formFields');
-        const formSuccess = document.getElementById('formSuccess');
-        const submitBtn = document.getElementById('submitBtn');
+document.addEventListener("DOMContentLoaded", () => {
 
-        submitBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+    const form = document.getElementById("formFields");
+    const submitBtn = document.getElementById("submitBtn");
+    const successMessage = document.getElementById("formSuccess");
 
-            // Simple validation
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const message = document.getElementById('message').value.trim();
+    if (!form) {
+        console.error("Contact form not found.");
+        return;
+    }
 
-            if (!name || !email || !message) {
-                alert('Please fill in all required fields (Name, Email, and Message).');
-                return;
+    form.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        // Get form values
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const service = document.getElementById("service").value;
+        const message = document.getElementById("message").value.trim();
+
+        // Basic validation
+        if (!name || !email || !message) {
+            alert("Please fill in your name, email address and project description.");
+            return;
+        }
+
+        // Email validation
+        const emailParts = email.split("@");
+        const domain = emailParts[1] || "";
+        const domainDot = domain.indexOf(".");
+        const validEmail = emailParts.length === 2 &&
+            emailParts[0].length > 0 &&
+            domainDot > 0 &&
+            domainDot < domain.length - 1 &&
+            !email.includes(" ");
+
+        if (!validEmail) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+
+        // Disable button while sending
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+
+        try {
+
+            const response = await fetch(
+                "/api/contact",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        phone,
+                        service,
+                        message
+                    })
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message ||
+                    "Something went wrong while sending your request."
+                );
             }
 
-            const atIndex = email.lastIndexOf('@');
-            if (atIndex < 1 || email.indexOf('.', atIndex) <= atIndex + 1 || atIndex === email.length - 1) {
-                alert('Please enter a valid email address.');
-                return;
+            // Hide form
+            form.style.display = "none";
+
+            // Show success message
+            successMessage.classList.add("show");
+
+            // Optional: restore Lucide icons
+            if (typeof lucide !== "undefined") {
+                lucide.createIcons();
             }
 
-            // Simulate form submission
-            submitBtn.textContent = 'Sending...';
-            submitBtn.disabled = true;
+        } catch (error) {
 
-            setTimeout(() => {
-                formFields.classList.add('hide');
-                formSuccess.classList.add('show');
-                submitBtn.textContent = 'Send My Request';
-                submitBtn.disabled = false;
+            console.error("Contact form error:", error);
 
-                // Reset after 8 seconds so the user can send another if they want
-                setTimeout(() => {
-                    formFields.classList.remove('hide');
-                    formSuccess.classList.remove('show');
-                    document.getElementById('name').value = '';
-                    document.getElementById('email').value = '';
-                    document.getElementById('phone').value = '';
-                    document.getElementById('service').value = '';
-                    document.getElementById('message').value = '';
-                }, 8000);
-            }, 1500);
-        });
+            alert(
+                error.message ||
+                "Unable to send your request. Please try again."
+            );
+
+            // Restore button
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send My Request";
+        }
+
+    });
+
+});
