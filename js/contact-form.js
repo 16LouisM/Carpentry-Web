@@ -86,6 +86,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 lucide.createIcons();
             }
 
+            // Revert back to the form after a short wait, so the
+            // person can send another enquiry without refreshing
+            setTimeout(() => {
+                successMessage.classList.remove("show");
+                form.style.display = "";
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Send My Request";
+            }, 15000);
+
         } catch (error) {
 
             console.error("Contact form error:", error);
