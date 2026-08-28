@@ -28,6 +28,13 @@
     object-fit: cover;
 
     z-index: 0;
+
+    /* Make the video fully non-interactive: no tap-to-play overlay,
+       no long-press context menu, no accidental fullscreen on iOS */
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 /* =========================================================
