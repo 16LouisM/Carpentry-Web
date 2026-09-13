@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,10 +12,8 @@
 
     <title>Admin Login — Modjadji Projects</title>
 
-    <link
-        rel="stylesheet"
-        href="css/admin.css"
-    >
+    <link rel="stylesheet" href="./css/admin.css">
+
 </head>
 
 <body>
@@ -24,14 +23,21 @@
         <div class="login-card">
 
             <div class="login-header">
-                <span class="eyebrow">MODJADJI PROJECTS</span>
 
-                <h1>Admin Login</h1>
+                <p class="login-label">
+                    MODJADJI PROJECTS
+                </p>
+
+                <h1>
+                    Admin Login
+                </h1>
 
                 <p>
                     Sign in to manage your website.
                 </p>
+
             </div>
+
 
             <form id="loginForm">
 
@@ -44,11 +50,14 @@
                     <input
                         type="email"
                         id="email"
-                        placeholder="admin@example.com"
+                        name="email"
+                        placeholder="Admin email"
                         required
+                        autocomplete="email"
                     >
 
                 </div>
+
 
                 <div class="form-group">
 
@@ -59,11 +68,14 @@
                     <input
                         type="password"
                         id="password"
-                        placeholder="Enter your password"
+                        name="password"
+                        placeholder="Password"
                         required
+                        autocomplete="current-password"
                     >
 
                 </div>
+
 
                 <button
                     type="submit"
@@ -72,9 +84,10 @@
                     Sign In
                 </button>
 
+
                 <p
-                    id="loginError"
-                    class="error-message"
+                    id="loginMessage"
+                    class="login-message"
                 ></p>
 
             </form>
@@ -83,9 +96,10 @@
 
     </main>
 
+
     <script
         type="module"
-        src="js/login.js"
+        src="./js/login.js"
     ></script>
 
 </body>

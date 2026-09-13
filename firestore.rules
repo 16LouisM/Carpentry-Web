@@ -1,7 +1,121 @@
 rules_version = '2';
 
 service cloud.firestore {
+
   match /databases/{database}/documents {
+
+    // ─────────────────────────────────────
+    // ADMIN CHECK
+    // ─────────────────────────────────────
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(
+          /databases/$(database)/documents/admins/$(request.auth.uid)
+        );
+    }
+
+
+    // ─────────────────────────────────────
+    // ADMINS
+    // ─────────────────────────────────────
+
+    match /admins/{userId} {
+
+      // An admin can read their own admin document
+      allow read: if isAdmin()
+        && request.auth.uid == userId;
+
+      // Admin documents cannot be modified from the website
+      allow create, update, delete: if false;
+    }
+
+
+    // ─────────────────────────────────────
+    // PROJECTS
+    // ─────────────────────────────────────
+
+    match /projects/{projectId} {
+
+      // Public website can display projects
+      allow read: if true;
+
+      // Only admins can manage projects
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ─────────────────────────────────────
+    // SERVICES
+    // ─────────────────────────────────────
+
+    match /services/{serviceId} {
+
+      // Public website can display services
+      allow read: if true;
+
+      // Only admins can manage services
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ─────────────────────────────────────
+    // TESTIMONIALS
+    // ─────────────────────────────────────
+
+    match /testimonials/{testimonialId} {
+
+      // Public users can only see approved testimonials.
+      // Admins can see everything.
+      allow read: if isAdmin()
+        || resource.data.status == "approved";
+
+
+      // Anyone can submit a testimonial,
+      // but it MUST start as pending.
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          "clientName",
+          "review",
+          "rating",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ])
+        && request.resource.data.clientName is string
+        && request.resource.data.review is string
+        && request.resource.data.rating is number
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.status == "pending";
+
+
+      // Only admins can approve, reject or modify testimonials
+      allow update: if isAdmin();
+
+      // Only admins can permanently delete testimonials
+      allow delete: if isAdmin();
+    }
+
+
+    // ─────────────────────────────────────
+    // SITE SETTINGS
+    // ─────────────────────────────────────
+
+    match /settings/{settingId} {
+
+      // Public website can read settings
+      allow read: if true;
+
+      // Only admins can modify settings
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ─────────────────────────────────────
+    // EVERYTHING ELSE
+    // ─────────────────────────────────────
+
     match /{document=**} {
       allow read, write: if false;
     }

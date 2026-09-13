@@ -1,84 +1,68 @@
+// admin/js/login.js
+
 import {
     loginAdmin,
     watchAuthState
-} from "../../js/firebase-auth.js";
+} from "./firebase-auth.js";
 
-import {
-    isAdmin
-} from "../../js/firebase-firestore.js";
 
+// ─────────────────────────────────────
+// ELEMENTS
+// ─────────────────────────────────────
 
 const loginForm = document.getElementById("loginForm");
 const loginButton = document.getElementById("loginButton");
-const loginError = document.getElementById("loginError");
+const loginMessage = document.getElementById("loginMessage");
 
 
-// ==========================================
+// ─────────────────────────────────────
 // CHECK EXISTING LOGIN
-// ==========================================
+// ─────────────────────────────────────
 
-watchAuthState(async (user) => {
+watchAuthState((user) => {
 
-    if (!user) {
-        return;
-    }
+    if (user) {
 
-    const admin = await isAdmin(user.uid);
+        window.location.href = "./dashboard.html";
 
-    if (admin) {
-        window.location.href = "dashboard.html";
-    } else {
-        loginError.textContent =
-            "This account does not have administrator access.";
     }
 
 });
 
 
-// ==========================================
+// ─────────────────────────────────────
 // LOGIN
-// ==========================================
+// ─────────────────────────────────────
 
 loginForm.addEventListener("submit", async (event) => {
 
     event.preventDefault();
 
-    loginError.textContent = "";
+    const email = document
+        .getElementById("email")
+        .value
+        .trim();
 
-    const email =
-        document.getElementById("email").value.trim();
-
-    const password =
-        document.getElementById("password").value;
+    const password = document
+        .getElementById("password")
+        .value;
 
 
     loginButton.disabled = true;
     loginButton.textContent = "Signing in...";
 
+    loginMessage.textContent = "";
+
 
     try {
 
-        const user = await loginAdmin(
-            email,
-            password
-        );
+        const user = await loginAdmin(email, password);
 
-        const admin = await isAdmin(user.uid);
+        console.log("Logged in:", user.uid);
 
-        if (!admin) {
+        loginMessage.textContent = "Login successful.";
 
-            loginError.textContent =
-                "You are authenticated, but you are not an administrator.";
-
-            loginButton.disabled = false;
-            loginButton.textContent = "Sign In";
-
-            return;
-        }
-
-
-        window.location.href = "dashboard.html";
-
+        window.location.href = "./dashboard.html";
 
     } catch (error) {
 
@@ -87,32 +71,35 @@ loginForm.addEventListener("submit", async (event) => {
         switch (error.code) {
 
             case "auth/invalid-credential":
-                loginError.textContent =
+                loginMessage.textContent =
                     "Incorrect email or password.";
                 break;
 
             case "auth/user-not-found":
-                loginError.textContent =
+                loginMessage.textContent =
                     "No account was found with this email.";
                 break;
 
             case "auth/wrong-password":
-                loginError.textContent =
+                loginMessage.textContent =
                     "Incorrect password.";
                 break;
 
             case "auth/too-many-requests":
-                loginError.textContent =
+                loginMessage.textContent =
                     "Too many attempts. Please try again later.";
                 break;
 
             default:
-                loginError.textContent =
+                loginMessage.textContent =
                     "Unable to sign in. Please try again.";
         }
 
+    } finally {
+
         loginButton.disabled = false;
         loginButton.textContent = "Sign In";
+
     }
 
 });
