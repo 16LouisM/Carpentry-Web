@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin Dashboard — Modjadji Projects</title>
+
+    <link
+        rel="stylesheet"
+        href="css/admin.css"
+    >
+
+</head>
+
+<body>
+
+    <div class="admin-layout">
+
+        <!-- SIDEBAR -->
+
+        <aside class="admin-sidebar">
+
+            <div class="admin-brand">
+
+                <span>MODJADJI</span>
+
+                <strong>PROJECTS</strong>
+
+            </div>
+
+
+            <nav>
+
+                <button
+                    class="nav-item active"
+                    data-section="overview"
+                >
+                    Overview
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-section="projects"
+                >
+                    Projects
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-section="services"
+                >
+                    Services
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-section="testimonials"
+                >
+                    Testimonials
+                </button>
+
+                <button
+                    class="nav-item"
+                    data-section="settings"
+                >
+                    Settings
+                </button>
+
+            </nav>
+
+
+            <button
+                id="logoutButton"
+                class="logout-button"
+            >
+                Sign Out
+            </button>
+
+        </aside>
+
+
+        <!-- MAIN -->
+
+        <main class="admin-main">
+
+            <header class="admin-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        ADMINISTRATION
+                    </span>
+
+                    <h1 id="pageTitle">
+                        Dashboard
+                    </h1>
+
+                </div>
+
+                <div id="adminEmail"></div>
+
+            </header>
+
+
+            <!-- OVERVIEW -->
+
+            <section
+                id="overview"
+                class="admin-section active"
+            >
+
+                <h2>Welcome to your dashboard</h2>
+
+                <p>
+                    Manage your Modjadji Projects website
+                    from one place.
+                </p>
+
+                <div class="dashboard-cards">
+
+                    <div class="dashboard-card">
+                        <span>Projects</span>
+                        <strong id="projectCount">—</strong>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <span>Services</span>
+                        <strong id="serviceCount">—</strong>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <span>Pending Reviews</span>
+                        <strong id="pendingCount">—</strong>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <span>Approved Reviews</span>
+                        <strong id="approvedCount">—</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PROJECTS -->
+
+            <section
+                id="projects"
+                class="admin-section"
+            >
+
+                <h2>Projects</h2>
+
+                <p>
+                    Manage your portfolio projects here.
+                </p>
+
+                <div id="projectsList">
+                    Loading projects...
+                </div>
+
+            </section>
+
+
+            <!-- SERVICES -->
+
+            <section
+                id="services"
+                class="admin-section"
+            >
+
+                <h2>Services</h2>
+
+                <p>
+                    Manage the services displayed on your
+                    website.
+                </p>
+
+                <div id="servicesList">
+                    Loading services...
+                </div>
+
+            </section>
+
+
+            <!-- TESTIMONIALS -->
+
+            <section
+                id="testimonials"
+                class="admin-section"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <h2>Client Reviews</h2>
+
+                        <p>
+                            Review, approve, reject or remove
+                            client testimonials.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div id="testimonialsList">
+                    Loading testimonials...
+                </div>
+
+            </section>
+
+
+            <!-- SETTINGS -->
+
+            <section
+                id="settings"
+                class="admin-section"
+            >
+
+                <h2>Site Settings</h2>
+
+                <p>
+                    Manage your business information.
+                </p>
+
+                <p class="coming-soon">
+                    Settings management will be added
+                    in the next phase.
+                </p>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script
+        type="module"
+        src="js/admin-guard.js"
+    ></script>
+
+    <script
+        type="module"
+        src="js/dashboard.js"
+    ></script>
+
+</body>
+
+</html>

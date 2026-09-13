@@ -1,0 +1,146 @@
+rules_version = '2';
+
+service cloud.firestore {
+
+    match /databases/{database}/documents {
+
+
+        // ==========================================
+        // ADMIN CHECK
+        // ==========================================
+
+        function isAdmin() {
+
+            return request.auth != null
+                && exists(
+                    /databases/$(database)/documents/admins/$(request.auth.uid)
+                );
+
+        }
+
+
+        // ==========================================
+        // ADMINS
+        // ==========================================
+
+        match /admins/{userId} {
+
+            // An admin can read their own admin document.
+            allow read: if isAdmin()
+                        && request.auth.uid == userId;
+
+            // Nobody can create or modify admin records
+            // from the website.
+            allow create, update, delete: if false;
+
+        }
+
+
+        // ==========================================
+        // PROJECTS
+        // ==========================================
+
+        match /projects/{projectId} {
+
+            // Public website can display projects.
+            allow read: if true;
+
+            // Only administrators can manage projects.
+            allow create, update, delete: if isAdmin();
+
+        }
+
+
+        // ==========================================
+        // SERVICES
+        // ==========================================
+
+        match /services/{serviceId} {
+
+            // Public website can display services.
+            allow read: if true;
+
+            // Only administrators can manage services.
+            allow create, update, delete: if isAdmin();
+
+        }
+
+
+        // ==========================================
+        // TESTIMONIALS
+        // ==========================================
+
+        match /testimonials/{testimonialId} {
+
+
+            // Public users can only read approved reviews.
+            //
+            // Admins can read everything.
+            allow read: if
+                (
+                    resource.data.status == "approved"
+                )
+                ||
+                isAdmin();
+
+
+            // Public users can submit a review,
+            // but it MUST start as pending.
+            allow create: if
+
+                request.resource.data.keys().hasOnly([
+                    "clientName",
+                    "review",
+                    "rating",
+                    "status",
+                    "createdAt",
+                    "updatedAt"
+                ])
+
+                && request.resource.data.clientName is string
+                && request.resource.data.review is string
+                && request.resource.data.rating is number
+
+                && request.resource.data.rating >= 1
+                && request.resource.data.rating <= 5
+
+                && request.resource.data.status == "pending";
+
+
+            // Only admins can change review status.
+            allow update: if isAdmin();
+
+
+            // Only admins can permanently delete reviews.
+            allow delete: if isAdmin();
+
+        }
+
+
+        // ==========================================
+        // SETTINGS
+        // ==========================================
+
+        match /settings/{settingId} {
+
+            // Public website can read business settings.
+            allow read: if true;
+
+            // Only admins can change settings.
+            allow create, update, delete: if isAdmin();
+
+        }
+
+
+        // ==========================================
+        // DENY EVERYTHING ELSE
+        // ==========================================
+
+        match /{document=**} {
+
+            allow read, write: if false;
+
+        }
+
+    }
+}
