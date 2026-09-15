@@ -1,11 +1,13 @@
 // server/server.js
 
-require("dotenv").config({ path: __dirname + "/.env" });
-
 const express = require("express");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
 const path = require("path");
+
+require("dotenv").config({
+    path: path.join(__dirname, ".env")
+});
 
 const app = express();
 
@@ -19,8 +21,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve the main website
+// Serve the main website (remove this if the frontend is hosted
+// separately, e.g. on Vercel, and only the API runs here)
 app.use(express.static(path.join(__dirname, "..")));
+
 
 // =====================================================
 // EMAIL CONFIGURATION
@@ -34,7 +38,8 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Check email connection when the server starts
+// Check email connection when the server starts, so a bad
+// EMAIL_USER/EMAIL_PASS shows up in the logs immediately
 transporter.verify((error, success) => {
     if (error) {
         console.error("✖ Email server connection failed:");
@@ -44,8 +49,21 @@ transporter.verify((error, success) => {
     }
 });
 
+
 // =====================================================
-// CONTACT / REQUEST FORM
+// HEALTH CHECK
+// =====================================================
+
+app.get("/api/health", (req, res) => {
+    res.json({
+        success: true,
+        message: "Modjadji Projects server is running."
+    });
+});
+
+
+// =====================================================
+// CONTACT FORM
 // =====================================================
 
 app.post("/api/contact", async (req, res) => {
@@ -58,20 +76,23 @@ app.post("/api/contact", async (req, res) => {
             phone,
             service,
             message
-        } = req.body;
+        } = req.body || {};
+
 
         // ---------------------------------------------
-        // VALIDATION
+        // BASIC VALIDATION
         // ---------------------------------------------
 
         if (!name || !email || !message) {
+
             return res.status(400).json({
                 success: false,
-                message: "Please provide your name, email and message."
+                message:
+                    "Please complete all required fields."
             });
+
         }
 
-        // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email)) {
@@ -81,204 +102,144 @@ app.post("/api/contact", async (req, res) => {
             });
         }
 
+
         // ---------------------------------------------
-        // EMAIL TO BUSINESS
+        // HIDDEN ADMIN TRIGGER
         // ---------------------------------------------
 
-        const businessMail = {
+        const adminTrigger =
+            process.env.ADMIN_TRIGGER;
+
+        const submittedMessage =
+            String(message).trim();
+
+        if (
+            adminTrigger &&
+            submittedMessage === adminTrigger
+        ) {
+
+            console.log(
+                "Admin trigger detected."
+            );
+
+            return res.status(200).json({
+                success: true,
+                adminRedirect: true,
+                redirect: "/admin/index.html"
+            });
+
+        }
+
+
+        // ---------------------------------------------
+        // ESCAPE HTML
+        // ---------------------------------------------
+
+        function escapeHtml(value) {
+
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+
+        const safeName =
+            escapeHtml(name);
+
+        const safeEmail =
+            escapeHtml(email);
+
+        const safePhone =
+            escapeHtml(phone || "Not provided");
+
+        const safeService =
+            escapeHtml(service || "Not specified");
+
+        const safeMessage =
+            escapeHtml(message)
+                .replaceAll("\n", "<br>");
+
+
+        // ---------------------------------------------
+        // SEND EMAIL
+        // ---------------------------------------------
+
+        await transporter.sendMail({
+
             from: process.env.EMAIL_USER,
-            to: process.env.BUSINESS_EMAIL || process.env.EMAIL_USER,
+
+            to: process.env.BUSINESS_EMAIL,
 
             replyTo: email,
 
-            subject: `New Website Request from ${name}`,
-
-            text: `
-New customer request from the Modjadji Projects website.
-
-Name:
-${name}
-
-Email:
-${email}
-
-Phone:
-${phone || "Not provided"}
-
-Service:
-${service || "Not specified"}
-
-Message:
-${message}
-            `,
+            subject:
+                `New Website Enquiry - ${name}`,
 
             html: `
-                <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-
-                    <h2>New Website Request</h2>
-
-                    <p>
-                        A new customer request has been submitted
-                        through the Modjadji Projects website.
-                    </p>
-
-                    <hr>
-
-                    <h3>Client Details</h3>
-
-                    <p>
-                        <strong>Name:</strong><br>
-                        ${escapeHtml(name)}
-                    </p>
-
-                    <p>
-                        <strong>Email:</strong><br>
-                        ${escapeHtml(email)}
-                    </p>
-
-                    <p>
-                        <strong>Phone:</strong><br>
-                        ${escapeHtml(phone || "Not provided")}
-                    </p>
-
-                    <p>
-                        <strong>Service:</strong><br>
-                        ${escapeHtml(service || "Not specified")}
-                    </p>
-
-                    <h3>Message</h3>
-
-                    <p>
-                        ${escapeHtml(message).replace(/\n/g, "<br>")}
-                    </p>
-
-                    <hr>
-
-                    <p>
-                        <strong>Reply directly to this email to contact the client.</strong>
-                    </p>
-
-                </div>
+                <!DOCTYPE html>
+                <html>
+                <body style="
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                ">
+                    <h2>New Website Enquiry</h2>
+                    <p><strong>Name:</strong> ${safeName}</p>
+                    <p><strong>Email:</strong> ${safeEmail}</p>
+                    <p><strong>Phone:</strong> ${safePhone}</p>
+                    <p><strong>Service:</strong> ${safeService}</p>
+                    <p><strong>Project Description:</strong></p>
+                    <p>${safeMessage}</p>
+                </body>
+                </html>
             `
-        };
 
-        // Send email to business
-        await transporter.sendMail(businessMail);
+        });
 
-        // ---------------------------------------------
-        // OPTIONAL CONFIRMATION EMAIL TO CLIENT
-        // ---------------------------------------------
 
-        const clientMail = {
-            from: process.env.EMAIL_USER,
-            to: email,
+        console.log(
+            `New enquiry received from ${name} (${email})`
+        );
 
-            subject: "We received your request — Modjadji Projects",
-
-            text: `
-Hello ${name},
-
-Thank you for contacting Modjadji Projects.
-
-We have received your request and will get back to you as soon as possible.
-
-Regards,
-Modjadji Projects
-            `,
-
-            html: `
-                <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-
-                    <h2>Thank you for contacting Modjadji Projects</h2>
-
-                    <p>Hello ${escapeHtml(name)},</p>
-
-                    <p>
-                        Thank you for getting in touch with us.
-                        We have received your request successfully.
-                    </p>
-
-                    <p>
-                        Our team will review your message and
-                        get back to you as soon as possible.
-                    </p>
-
-                    <br>
-
-                    <p>
-                        Kind regards,<br>
-                        <strong>Modjadji Projects</strong>
-                    </p>
-
-                </div>
-            `
-        };
-
-        // Send confirmation to client
-        await transporter.sendMail(clientMail);
 
         // ---------------------------------------------
-        // SUCCESS RESPONSE
+        // SUCCESS
         // ---------------------------------------------
 
         return res.status(200).json({
             success: true,
-            message: "Your request has been sent successfully."
+            message:
+                "Your request has been sent successfully."
         });
+
 
     } catch (error) {
 
-        console.error("Contact form error:");
-        console.error(error);
+        console.error(
+            "Email sending error:",
+            error
+        );
 
         return res.status(500).json({
             success: false,
-            message: "Something went wrong while sending your request."
+            message:
+                "Unable to send your request. Please try again."
         });
+
     }
-});
-
-// =====================================================
-// HEALTH CHECK
-// =====================================================
-
-app.get("/api/health", (req, res) => {
-
-    res.json({
-        success: true,
-        message: "Modjadji Projects server is running.",
-        time: new Date().toISOString()
-    });
 
 });
+
 
 // =====================================================
 // START SERVER
 // =====================================================
 
 app.listen(PORT, () => {
-
-    console.log("");
-    console.log("==========================================");
-    console.log("     MODJADJI PROJECTS SERVER");
-    console.log("==========================================");
-    console.log(`✓ Server running on port ${PORT}`);
-    console.log(`✓ http://localhost:${PORT}`);
-    console.log("==========================================");
-    console.log("");
-
+    console.log(
+        `Modjadji Projects server running on port ${PORT}`
+    );
 });
-
-// =====================================================
-// HTML ESCAPE FUNCTION
-// =====================================================
-
-function escapeHtml(value) {
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}

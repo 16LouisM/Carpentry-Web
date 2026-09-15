@@ -1,69 +1,53 @@
 // admin/js/admin-guard.js
 
-import {
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-import { app } from "./firebase-config.js";
-
-const db = getFirestore(app);
-
-const auth = (() => {
-    return import("./firebase-auth.js").then(module => module.auth);
-})();
-
-async function checkAdmin(user) {
-
-    if (!user) {
-        window.location.href = "/admin/index.html";
-        return false;
-    }
-
-    try {
-
-        const adminRef = doc(db, "admins", user.uid);
-        const adminSnapshot = await getDoc(adminRef);
-
-        if (!adminSnapshot.exists()) {
-
-            console.warn("User is authenticated but is not an admin.");
-
-            window.location.href = "/admin/index.html";
-
-            return false;
-        }
-
-        return true;
-
-    } catch (error) {
-
-        console.error("Admin verification failed:", error);
-
-        window.location.href = "/admin/index.html";
-
-        return false;
-    }
-}
+import { isAdmin } from "../../js/firebase-firestore.js";
+import { watchAuthState } from "./firebase-auth.js";
 
 
-export async function protectAdminPage() {
+// ==========================================
+// PAGE PROTECTION
+// ==========================================
+//
+// Resolves with the user object once an admin is confirmed.
+// Otherwise it sends the browser to the login page and never resolves,
+// because the page is being replaced anyway.
 
-    const { auth: firebaseAuth } = await auth;
+export function protectAdminPage() {
 
     return new Promise((resolve) => {
 
-        onAuthStateChanged(firebaseAuth, async (user) => {
+        let unsubscribe = null;
+        let settled = false;
 
-            const result = await checkAdmin(user);
+        unsubscribe = watchAuthState(async (user) => {
 
-            resolve(result);
+            if (settled) {
+                return;
+            }
+
+            settled = true;
+
+            if (typeof unsubscribe === "function") {
+                unsubscribe();
+            }
+
+            if (user && await isAdmin(user.uid)) {
+                resolve(user);
+                return;
+            }
+
+            if (!user) {
+                console.warn("No signed-in user.");
+            } else {
+                console.warn(
+                    `Signed in as ${user.email} (${user.uid}) but there ` +
+                    `is no matching document at admins/${user.uid}.`
+                );
+            }
+
+            // replace() instead of href so the dashboard is not left in
+            // the history stack for the back button to walk into.
+            window.location.replace("./index.html");
         });
 
     });

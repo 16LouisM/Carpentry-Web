@@ -1,105 +1,144 @@
 // admin/js/login.js
 
-import {
-    loginAdmin,
-    watchAuthState
-} from "./firebase-auth.js";
+import { loginAdmin, logoutAdmin } from "./firebase-auth.js";
+import { isAdmin } from "../../js/firebase-firestore.js";
 
 
-// ─────────────────────────────────────
-// ELEMENTS
-// ─────────────────────────────────────
-
-const loginForm = document.getElementById("loginForm");
+const form = document.getElementById("loginForm");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
 const loginButton = document.getElementById("loginButton");
 const loginMessage = document.getElementById("loginMessage");
 
 
-// ─────────────────────────────────────
-// CHECK EXISTING LOGIN
-// ─────────────────────────────────────
+// ==========================================
+// ALWAYS START FROM A CLEAN SESSION
+// ==========================================
+//
+// This page never forwards an existing session to the dashboard.
+// Any session Firebase is still holding is cleared the moment the login
+// page opens, so the hidden contact-form trigger always lands on the
+// form instead of jumping past it.
 
-watchAuthState((user) => {
-
-    if (user) {
-
-        window.location.href = "./dashboard.html";
-
-    }
-
+const sessionCleared = logoutAdmin().catch((error) => {
+    console.error("Could not clear the previous session:", error);
 });
 
 
-// ─────────────────────────────────────
-// LOGIN
-// ─────────────────────────────────────
+// ==========================================
+// MESSAGES
+// ==========================================
 
-loginForm.addEventListener("submit", async (event) => {
+function showMessage(text, isError = true) {
 
-    event.preventDefault();
+    if (!loginMessage) {
+        return;
+    }
 
-    const email = document
-        .getElementById("email")
-        .value
-        .trim();
+    loginMessage.textContent = text;
 
-    const password = document
-        .getElementById("password")
-        .value;
-
-
-    loginButton.disabled = true;
-    loginButton.textContent = "Signing in...";
-
-    loginMessage.textContent = "";
+    loginMessage.classList.toggle("error", isError);
+    loginMessage.classList.toggle("success", !isError);
+}
 
 
-    try {
+function setBusy(busy) {
 
-        const user = await loginAdmin(email, password);
+    if (!loginButton) {
+        return;
+    }
 
-        console.log("Logged in:", user.uid);
+    loginButton.disabled = busy;
+    loginButton.textContent = busy ? "Signing in..." : "Sign In";
+}
 
-        loginMessage.textContent = "Login successful.";
 
-        window.location.href = "./dashboard.html";
+// ==========================================
+// ERROR TEXT
+// ==========================================
 
-    } catch (error) {
+function messageForError(error) {
 
-        console.error(error);
+    switch (error && error.code) {
 
-        switch (error.code) {
+        case "auth/invalid-email":
+            return "That email address is not valid.";
 
-            case "auth/invalid-credential":
-                loginMessage.textContent =
-                    "Incorrect email or password.";
-                break;
+        case "auth/user-disabled":
+            return "This account has been disabled.";
 
-            case "auth/user-not-found":
-                loginMessage.textContent =
-                    "No account was found with this email.";
-                break;
+        case "auth/user-not-found":
+        case "auth/wrong-password":
+        case "auth/invalid-credential":
+            return "Incorrect email or password.";
 
-            case "auth/wrong-password":
-                loginMessage.textContent =
-                    "Incorrect password.";
-                break;
+        case "auth/too-many-requests":
+            return "Too many attempts. Please wait a moment and try again.";
 
-            case "auth/too-many-requests":
-                loginMessage.textContent =
-                    "Too many attempts. Please try again later.";
-                break;
+        case "auth/network-request-failed":
+            return "Network error. Check your connection and try again.";
 
-            default:
-                loginMessage.textContent =
-                    "Unable to sign in. Please try again.";
+        default:
+            return "Unable to sign in. Please try again.";
+    }
+}
+
+
+// ==========================================
+// SUBMIT
+// ==========================================
+
+if (!form) {
+
+    console.error("ERROR: loginForm was not found.");
+
+} else {
+
+    form.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+            showMessage("Please enter your email and password.");
+            return;
         }
 
-    } finally {
+        setBusy(true);
+        showMessage("", false);
 
-        loginButton.disabled = false;
-        loginButton.textContent = "Sign In";
+        try {
 
-    }
+            // Wait for the clean-up sign-out above to finish first,
+            // so it cannot cancel the sign-in that follows.
+            await sessionCleared;
 
-});
+            const user = await loginAdmin(email, password);
+
+            if (!(await isAdmin(user.uid))) {
+
+                await logoutAdmin();
+
+                showMessage("This account does not have admin access.");
+
+                setBusy(false);
+
+                return;
+            }
+
+            window.location.replace("./dashboard.html");
+
+        } catch (error) {
+
+            console.error("Login error:", error);
+
+            showMessage(messageForError(error));
+
+            setBusy(false);
+        }
+
+    });
+
+}
