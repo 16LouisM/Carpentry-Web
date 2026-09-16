@@ -41,6 +41,14 @@ const aboutImagePreview = document.getElementById("aboutImagePreview");
 const saveAboutButton = document.getElementById("saveAboutButton");
 const aboutStatus = document.getElementById("aboutStatus");
 
+const contactAddressInput = document.getElementById("contactAddressInput");
+const contactPhoneInput = document.getElementById("contactPhoneInput");
+const contactEmailInput = document.getElementById("contactEmailInput");
+const contactHoursInput = document.getElementById("contactHoursInput");
+const serviceAreaTextArea = document.getElementById("serviceAreaTextArea");
+const saveContactButton = document.getElementById("saveContactButton");
+const contactStatus = document.getElementById("contactStatus");
+
 
 // Set while a deliberate sign-out is in progress, so the auth watcher
 // below does not fight the logout handler over where to navigate.
@@ -478,9 +486,6 @@ function attachTestimonialActions() {
 // ==========================================
 // SITE SETTINGS — SHARED STATE
 // ==========================================
-//
-// Tracks the currently-saved image URLs so "Save" can reuse the existing
-// image when the admin edits text without picking a new photo.
 
 let selectedLogoFile = null;
 let selectedAboutImageFile = null;
@@ -530,6 +535,31 @@ async function initSettingsPanel() {
         if (aboutImagePreview) {
             aboutImagePreview.src = settings.aboutImageUrl;
         }
+    }
+
+
+    // --------------------------------------
+    // CONTACT DETAILS
+    // --------------------------------------
+
+    if (contactAddressInput && settings.contactAddress) {
+        contactAddressInput.value = settings.contactAddress;
+    }
+
+    if (contactPhoneInput && settings.contactPhone) {
+        contactPhoneInput.value = settings.contactPhone;
+    }
+
+    if (contactEmailInput && settings.contactEmail) {
+        contactEmailInput.value = settings.contactEmail;
+    }
+
+    if (contactHoursInput && settings.contactHours) {
+        contactHoursInput.value = settings.contactHours;
+    }
+
+    if (serviceAreaTextArea && settings.serviceAreaText) {
+        serviceAreaTextArea.value = settings.serviceAreaText;
     }
 
 }
@@ -659,8 +689,6 @@ if (saveAboutButton) {
 
             let aboutImageUrl = currentAboutImageUrl;
 
-            // Only hits Cloudinary if a new photo was actually chosen —
-            // saving text-only edits doesn't re-upload anything.
             if (selectedAboutImageFile) {
 
                 const formData = new FormData();
@@ -711,6 +739,66 @@ if (saveAboutButton) {
         } finally {
 
             saveAboutButton.disabled = false;
+        }
+
+    });
+
+}
+
+
+// ==========================================
+// CONTACT DETAILS — SAVE
+// ==========================================
+//
+// No image involved here, so this is a straightforward Firestore write
+// with no Cloudinary step.
+
+if (saveContactButton) {
+
+    saveContactButton.addEventListener("click", async () => {
+
+        saveContactButton.disabled = true;
+
+        if (contactStatus) {
+            contactStatus.textContent = "Saving...";
+        }
+
+        try {
+
+            await updateSiteSettings({
+                contactAddress: contactAddressInput
+                    ? contactAddressInput.value.trim()
+                    : "",
+                contactPhone: contactPhoneInput
+                    ? contactPhoneInput.value.trim()
+                    : "",
+                contactEmail: contactEmailInput
+                    ? contactEmailInput.value.trim()
+                    : "",
+                contactHours: contactHoursInput
+                    ? contactHoursInput.value.trim()
+                    : "",
+                serviceAreaText: serviceAreaTextArea
+                    ? serviceAreaTextArea.value.trim()
+                    : ""
+            });
+
+            if (contactStatus) {
+                contactStatus.textContent = "Contact details saved.";
+            }
+
+        } catch (error) {
+
+            console.error("Contact details save error:", error);
+
+            if (contactStatus) {
+                contactStatus.textContent =
+                    error.message || "Unable to save contact details.";
+            }
+
+        } finally {
+
+            saveContactButton.disabled = false;
         }
 
     });

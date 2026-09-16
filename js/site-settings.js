@@ -1,8 +1,7 @@
 // js/site-settings.js
 //
 // Applies admin-editable site-wide settings to the public homepage:
-// the logo, and now the "Who We Are" heading, body text and photo.
-// Contact Details will extend this same file once it's built.
+// logo, "Who We Are" content, and now Contact Details.
 //
 // Every field is optional — if settings/site doesn't have it yet, the
 // existing static HTML is left exactly as it is.
@@ -49,8 +48,6 @@ async function applySiteSettings() {
         // --------------------------------------
         // WHO WE ARE — BODY TEXT
         // --------------------------------------
-        //
-        // Stored as one string, paragraphs separated by a blank line.
 
         if (settings.aboutText) {
 
@@ -86,6 +83,94 @@ async function applySiteSettings() {
                 if (settings.aboutImageAlt) {
                     aboutImg.alt = settings.aboutImageAlt;
                 }
+            }
+        }
+
+
+        // --------------------------------------
+        // CONTACT — ADDRESS
+        // --------------------------------------
+
+        if (settings.contactAddress) {
+
+            const addressLink = document.getElementById("contactAddressLink");
+            const addressText = document.getElementById("contactAddressText");
+
+            if (addressText) {
+                addressText.textContent = settings.contactAddress;
+            }
+
+            if (addressLink) {
+                addressLink.href =
+                    "https://maps.google.com/?q=" +
+                    encodeURIComponent(settings.contactAddress);
+            }
+        }
+
+
+        // --------------------------------------
+        // CONTACT — PHONE
+        // --------------------------------------
+
+        if (settings.contactPhone) {
+
+            const phoneLink = document.getElementById("contactPhoneLink");
+            const phoneText = document.getElementById("contactPhoneText");
+
+            if (phoneText) {
+                phoneText.textContent = settings.contactPhone;
+            }
+
+            if (phoneLink) {
+                phoneLink.href =
+                    "tel:" + settings.contactPhone.replace(/\s+/g, "");
+            }
+        }
+
+
+        // --------------------------------------
+        // CONTACT — EMAIL
+        // --------------------------------------
+
+        if (settings.contactEmail) {
+
+            const emailLink = document.getElementById("contactEmailLink");
+            const emailText = document.getElementById("contactEmailText");
+
+            if (emailText) {
+                emailText.textContent = settings.contactEmail;
+            }
+
+            if (emailLink) {
+                emailLink.href = "mailto:" + settings.contactEmail;
+            }
+        }
+
+
+        // --------------------------------------
+        // CONTACT — HOURS
+        // --------------------------------------
+
+        if (settings.contactHours) {
+
+            const hoursText = document.getElementById("contactHoursText");
+
+            if (hoursText) {
+                hoursText.textContent = settings.contactHours;
+            }
+        }
+
+
+        // --------------------------------------
+        // CONTACT — SERVICE AREA
+        // --------------------------------------
+
+        if (settings.serviceAreaText) {
+
+            const serviceAreaEl = document.getElementById("serviceAreaText");
+
+            if (serviceAreaEl) {
+                serviceAreaEl.textContent = settings.serviceAreaText;
             }
         }
 
