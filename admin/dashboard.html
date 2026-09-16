@@ -186,35 +186,65 @@
 
 
             <!-- SETTINGS -->
+
             <section id="settings" class="admin-section">
 
                 <h2>Site Settings</h2>
 
-                <p>Manage your business information.</p>
+                <p>
+                    Manage your business information.
+                </p>
+
+
+                <!-- ================================================
+                     WEBSITE LOGO
+                ================================================= -->
 
                 <div class="settings-block">
 
                     <h3>Website Logo</h3>
 
-                    <p>This image appears in the navigation bar at the top of your website.</p>
+                    <p>
+                        This image appears in the navigation bar at
+                        the top of your website.
+                    </p>
 
-                    <div class="logo-preview-row" style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+                    <div
+                        class="logo-preview-row"
+                        style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;"
+                    >
 
-                        <img id="logoPreview" src="" alt="Current logo"
-                            style="width:80px; height:80px; object-fit:contain; background:#f4f1ec; border:1px solid #ddd; border-radius:8px; padding:8px;">
+                        <img
+                            id="logoPreview"
+                            src=""
+                            alt="Current logo"
+                            style="width:80px; height:80px; object-fit:contain; background:#f4f1ec; border:1px solid #ddd; border-radius:8px; padding:8px;"
+                        >
 
                         <div class="logo-upload-controls">
 
-                            <label for="logoFileInput">Choose a logo image</label>
+                            <label for="logoFileInput">Choose a logo file</label>
 
-                            <input type="file" id="logoFileInput" accept="image/jpeg,image/png,image/webp">
+                            <input
+                                type="file"
+                                id="logoFileInput"
+                                accept="image/jpeg,image/png,image/webp"
+                            >
 
-                            <button type="button" id="saveLogoButton" class="btn btn-primary" disabled
-                                style="margin-left:0.75rem;">
+                            <button
+                                type="button"
+                                id="saveLogoButton"
+                                class="btn btn-primary"
+                                disabled
+                                style="margin-left:0.75rem;"
+                            >
                                 Save Logo
                             </button>
 
-                            <p id="logoStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#777;"></p>
+                            <p
+                                id="logoStatus"
+                                style="margin-top:0.5rem; font-size:0.9rem; color:#777;"
+                            ></p>
 
                         </div>
 
@@ -222,7 +252,90 @@
 
                 </div>
 
-                <p class="coming-soon">More site settings will be added in future phases.</p>
+
+                <!-- ================================================
+                     WHO WE ARE
+                ================================================= -->
+
+                <div class="settings-block" style="margin-top:2rem;">
+
+                    <h3>Who We Are Section</h3>
+
+                    <p>
+                        Controls the "Who We Are" text and photo on
+                        your homepage.
+                    </p>
+
+                    <div class="form-group">
+
+                        <label for="aboutTitleInput">
+                            Heading
+                        </label>
+
+                        <input
+                            type="text"
+                            id="aboutTitleInput"
+                            placeholder="A Family Tradition of Fine Woodworking"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="aboutTextArea">
+                            Body text (leave a blank line between
+                            paragraphs)
+                        </label>
+
+                        <textarea
+                            id="aboutTextArea"
+                            rows="8"
+                            placeholder="Write each paragraph, leaving a blank line between them."
+                        ></textarea>
+
+                    </div>
+
+                    <div
+                        style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; margin-top:1rem;"
+                    >
+
+                        <img
+                            id="aboutImagePreview"
+                            src=""
+                            alt="Current Who We Are photo"
+                            style="width:110px; height:80px; object-fit:cover; background:#f4f1ec; border:1px solid #ddd; border-radius:8px;"
+                        >
+
+                        <label for="aboutImageFileInput">Who We Are photo</label>
+
+                        <input
+                            type="file"
+                            id="aboutImageFileInput"
+                            accept="image/jpeg,image/png,image/webp"
+                        >
+
+                    </div>
+
+                    <button
+                        type="button"
+                        id="saveAboutButton"
+                        class="btn btn-primary"
+                        style="margin-top:1rem;"
+                    >
+                        Save Who We Are Section
+                    </button>
+
+                    <p
+                        id="aboutStatus"
+                        style="margin-top:0.5rem; font-size:0.9rem; color:#777;"
+                    ></p>
+
+                </div>
+
+
+                <p class="coming-soon">
+                    More site settings will be added in future phases.
+                </p>
 
             </section>
 
@@ -231,7 +344,6 @@
     </div>
 
 
-    <script type="module" src="./js/admin-guard.js"></script>
     <script type="module" src="./js/dashboard.js"></script>
 
 </body>

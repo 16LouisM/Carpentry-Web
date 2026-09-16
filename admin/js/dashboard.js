@@ -34,6 +34,13 @@ const logoPreview = document.getElementById("logoPreview");
 const saveLogoButton = document.getElementById("saveLogoButton");
 const logoStatus = document.getElementById("logoStatus");
 
+const aboutTitleInput = document.getElementById("aboutTitleInput");
+const aboutTextArea = document.getElementById("aboutTextArea");
+const aboutImageFileInput = document.getElementById("aboutImageFileInput");
+const aboutImagePreview = document.getElementById("aboutImagePreview");
+const saveAboutButton = document.getElementById("saveAboutButton");
+const aboutStatus = document.getElementById("aboutStatus");
+
 
 // Set while a deliberate sign-out is in progress, so the auth watcher
 // below does not fight the logout handler over where to navigate.
@@ -66,8 +73,6 @@ if (!logoutButton) {
 
             await logoutAdmin();
 
-            // replace() rather than href: the dashboard should not stay
-            // in the history stack after signing out.
             window.location.replace("./index.html");
 
         } catch (error) {
@@ -90,9 +95,6 @@ if (!logoutButton) {
 // ==========================================
 // SESSION WATCHER
 // ==========================================
-//
-// Catches the session ending for any other reason (expired token, signed
-// out in another tab). The initial check is handled by protectAdminPage().
 
 watchAuthState((user) => {
 
@@ -474,33 +476,68 @@ function attachTestimonialActions() {
 
 
 // ==========================================
-// SITE SETTINGS — LOGO
+// SITE SETTINGS — SHARED STATE
 // ==========================================
+//
+// Tracks the currently-saved image URLs so "Save" can reuse the existing
+// image when the admin edits text without picking a new photo.
 
 let selectedLogoFile = null;
+let selectedAboutImageFile = null;
+let currentAboutImageUrl = "";
+
 
 async function initSettingsPanel() {
 
-    if (!logoPreview) {
-        // Settings section markup isn't on this page.
-        return;
-    }
+    let settings = {};
 
     try {
 
-        const settings = await getSiteSettings();
-
-        if (settings.logoUrl) {
-            logoPreview.src = settings.logoUrl;
-        }
+        settings = await getSiteSettings();
 
     } catch (error) {
 
         console.error("Could not load current site settings:", error);
+        return;
+    }
+
+
+    // --------------------------------------
+    // LOGO
+    // --------------------------------------
+
+    if (logoPreview && settings.logoUrl) {
+        logoPreview.src = settings.logoUrl;
+    }
+
+
+    // --------------------------------------
+    // WHO WE ARE
+    // --------------------------------------
+
+    if (aboutTitleInput && settings.aboutTitle) {
+        aboutTitleInput.value = settings.aboutTitle;
+    }
+
+    if (aboutTextArea && settings.aboutText) {
+        aboutTextArea.value = settings.aboutText;
+    }
+
+    if (settings.aboutImageUrl) {
+
+        currentAboutImageUrl = settings.aboutImageUrl;
+
+        if (aboutImagePreview) {
+            aboutImagePreview.src = settings.aboutImageUrl;
+        }
     }
 
 }
 
+
+// ==========================================
+// LOGO — SAVE
+// ==========================================
 
 if (logoFileInput) {
 
@@ -511,14 +548,9 @@ if (logoFileInput) {
         selectedLogoFile = file || null;
 
         if (file) {
-
-            // Local preview only — nothing is uploaded until Save is
-            // clicked.
             logoPreview.src = URL.createObjectURL(file);
             saveLogoButton.disabled = false;
-
         } else {
-
             saveLogoButton.disabled = true;
         }
 
@@ -552,23 +584,16 @@ if (saveLogoButton) {
 
             const uploadResponse = await adminFetch(
                 "/api/admin/images",
-                {
-                    method: "POST",
-                    body: formData
-                }
+                { method: "POST", body: formData }
             );
 
             const uploadResult = await uploadResponse.json();
 
             if (!uploadResponse.ok || !uploadResult.success) {
-                throw new Error(
-                    uploadResult.message || "Upload failed."
-                );
+                throw new Error(uploadResult.message || "Upload failed.");
             }
 
-            await updateSiteSettings({
-                logoUrl: uploadResult.image.url
-            });
+            await updateSiteSettings({ logoUrl: uploadResult.image.url });
 
             if (logoStatus) {
                 logoStatus.textContent = "Logo saved.";
@@ -582,13 +607,110 @@ if (saveLogoButton) {
             console.error("Logo save error:", error);
 
             if (logoStatus) {
-                logoStatus.textContent =
-                    error.message || "Unable to save logo.";
+                logoStatus.textContent = error.message || "Unable to save logo.";
             }
 
         } finally {
 
             saveLogoButton.disabled = true;
+        }
+
+    });
+
+}
+
+
+// ==========================================
+// WHO WE ARE — SAVE
+// ==========================================
+
+if (aboutImageFileInput) {
+
+    aboutImageFileInput.addEventListener("change", () => {
+
+        const file = aboutImageFileInput.files[0];
+
+        selectedAboutImageFile = file || null;
+
+        if (file && aboutImagePreview) {
+            aboutImagePreview.src = URL.createObjectURL(file);
+        }
+
+        if (aboutStatus) {
+            aboutStatus.textContent = "";
+        }
+
+    });
+
+}
+
+
+if (saveAboutButton) {
+
+    saveAboutButton.addEventListener("click", async () => {
+
+        saveAboutButton.disabled = true;
+
+        if (aboutStatus) {
+            aboutStatus.textContent = "Saving...";
+        }
+
+        try {
+
+            let aboutImageUrl = currentAboutImageUrl;
+
+            // Only hits Cloudinary if a new photo was actually chosen —
+            // saving text-only edits doesn't re-upload anything.
+            if (selectedAboutImageFile) {
+
+                const formData = new FormData();
+                formData.append("image", selectedAboutImageFile);
+
+                const uploadResponse = await adminFetch(
+                    "/api/admin/images",
+                    { method: "POST", body: formData }
+                );
+
+                const uploadResult = await uploadResponse.json();
+
+                if (!uploadResponse.ok || !uploadResult.success) {
+                    throw new Error(
+                        uploadResult.message || "Photo upload failed."
+                    );
+                }
+
+                aboutImageUrl = uploadResult.image.url;
+            }
+
+            await updateSiteSettings({
+                aboutTitle: aboutTitleInput ? aboutTitleInput.value.trim() : "",
+                aboutText: aboutTextArea ? aboutTextArea.value.trim() : "",
+                aboutImageUrl
+            });
+
+            currentAboutImageUrl = aboutImageUrl;
+            selectedAboutImageFile = null;
+
+            if (aboutImageFileInput) {
+                aboutImageFileInput.value = "";
+            }
+
+            if (aboutStatus) {
+                aboutStatus.textContent = "Who We Are section saved.";
+            }
+
+        } catch (error) {
+
+            console.error("Who We Are save error:", error);
+
+            if (aboutStatus) {
+                aboutStatus.textContent =
+                    error.message || "Unable to save this section.";
+            }
+
+        } finally {
+
+            saveAboutButton.disabled = false;
         }
 
     });
@@ -613,10 +735,6 @@ function escapeHTML(value) {
 // ==========================================
 // INITIALISE
 // ==========================================
-//
-// Nothing is read from Firestore until an admin has been confirmed,
-// otherwise the first reads fire while signed out and your security
-// rules reject them.
 
 (async function init() {
 
