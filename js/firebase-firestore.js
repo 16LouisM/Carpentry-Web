@@ -7,6 +7,7 @@ import {
     getDoc,
     getDocs,
     addDoc,
+    setDoc,
     updateDoc,
     deleteDoc,
     query,
@@ -39,6 +40,39 @@ export async function isAdmin(uid) {
         console.error("Admin check failed:", error);
         return false;
     }
+}
+
+
+// ==========================================
+// SITE SETTINGS
+// ==========================================
+//
+// One shared document, settings/site, holding site-wide fields that
+// the admin can edit — the logo now, and (in later phases) the "Who We
+// Are" text/image and contact details. Reading it never throws if the
+// document doesn't exist yet: it just returns {}, so callers should
+// treat every field as optional and fall back to whatever's already in
+// the HTML.
+
+const SITE_SETTINGS_REF = doc(db, "settings", "site");
+
+export async function getSiteSettings() {
+
+    const snapshot = await getDoc(SITE_SETTINGS_REF);
+
+    return snapshot.exists() ? snapshot.data() : {};
+}
+
+export async function updateSiteSettings(fields) {
+
+    await setDoc(
+        SITE_SETTINGS_REF,
+        {
+            ...fields,
+            updatedAt: serverTimestamp()
+        },
+        { merge: true }
+    );
 }
 
 

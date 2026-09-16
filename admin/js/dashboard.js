@@ -5,7 +5,9 @@ import {
     getServices,
     getAllTestimonials,
     updateTestimonialStatus,
-    deleteTestimonial
+    deleteTestimonial,
+    getSiteSettings,
+    updateSiteSettings
 } from "../../js/firebase-firestore.js";
 
 import {
@@ -14,6 +16,7 @@ import {
 } from "./firebase-auth.js";
 
 import { protectAdminPage } from "./admin-guard.js";
+import { adminFetch } from "./admin-fetch.js";
 
 
 // ==========================================
@@ -25,6 +28,11 @@ const sections = document.querySelectorAll(".admin-section");
 const pageTitle = document.getElementById("pageTitle");
 const logoutButton = document.getElementById("logoutButton");
 const adminEmail = document.getElementById("adminEmail");
+
+const logoFileInput = document.getElementById("logoFileInput");
+const logoPreview = document.getElementById("logoPreview");
+const saveLogoButton = document.getElementById("saveLogoButton");
+const logoStatus = document.getElementById("logoStatus");
 
 
 // Set while a deliberate sign-out is in progress, so the auth watcher
@@ -398,9 +406,6 @@ function testimonialHTML(testimonial) {
 // ==========================================
 // TESTIMONIAL ACTIONS
 // ==========================================
-//
-// One delegated listener on the container, attached once. The old code
-// re-bound a listener to every button on every reload.
 
 function attachTestimonialActions() {
 
@@ -469,6 +474,129 @@ function attachTestimonialActions() {
 
 
 // ==========================================
+// SITE SETTINGS — LOGO
+// ==========================================
+
+let selectedLogoFile = null;
+
+async function initSettingsPanel() {
+
+    if (!logoPreview) {
+        // Settings section markup isn't on this page.
+        return;
+    }
+
+    try {
+
+        const settings = await getSiteSettings();
+
+        if (settings.logoUrl) {
+            logoPreview.src = settings.logoUrl;
+        }
+
+    } catch (error) {
+
+        console.error("Could not load current site settings:", error);
+    }
+
+}
+
+
+if (logoFileInput) {
+
+    logoFileInput.addEventListener("change", () => {
+
+        const file = logoFileInput.files[0];
+
+        selectedLogoFile = file || null;
+
+        if (file) {
+
+            // Local preview only — nothing is uploaded until Save is
+            // clicked.
+            logoPreview.src = URL.createObjectURL(file);
+            saveLogoButton.disabled = false;
+
+        } else {
+
+            saveLogoButton.disabled = true;
+        }
+
+        if (logoStatus) {
+            logoStatus.textContent = "";
+        }
+
+    });
+
+}
+
+
+if (saveLogoButton) {
+
+    saveLogoButton.addEventListener("click", async () => {
+
+        if (!selectedLogoFile) {
+            return;
+        }
+
+        saveLogoButton.disabled = true;
+
+        if (logoStatus) {
+            logoStatus.textContent = "Uploading...";
+        }
+
+        try {
+
+            const formData = new FormData();
+            formData.append("image", selectedLogoFile);
+
+            const uploadResponse = await adminFetch(
+                "/api/admin/images",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            const uploadResult = await uploadResponse.json();
+
+            if (!uploadResponse.ok || !uploadResult.success) {
+                throw new Error(
+                    uploadResult.message || "Upload failed."
+                );
+            }
+
+            await updateSiteSettings({
+                logoUrl: uploadResult.image.url
+            });
+
+            if (logoStatus) {
+                logoStatus.textContent = "Logo saved.";
+            }
+
+            selectedLogoFile = null;
+            logoFileInput.value = "";
+
+        } catch (error) {
+
+            console.error("Logo save error:", error);
+
+            if (logoStatus) {
+                logoStatus.textContent =
+                    error.message || "Unable to save logo.";
+            }
+
+        } finally {
+
+            saveLogoButton.disabled = true;
+        }
+
+    });
+
+}
+
+
+// ==========================================
 // HTML ESCAPING
 // ==========================================
 
@@ -501,5 +629,6 @@ function escapeHTML(value) {
     attachTestimonialActions();
 
     await loadDashboardData();
+    await initSettingsPanel();
 
 })();

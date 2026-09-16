@@ -186,19 +186,43 @@
 
 
             <!-- SETTINGS -->
-
             <section id="settings" class="admin-section">
 
                 <h2>Site Settings</h2>
 
-                <p>
-                    Manage your business information.
-                </p>
+                <p>Manage your business information.</p>
 
-                <p class="coming-soon">
-                    Settings management will be added
-                    in the next phase.
-                </p>
+                <div class="settings-block">
+
+                    <h3>Website Logo</h3>
+
+                    <p>This image appears in the navigation bar at the top of your website.</p>
+
+                    <div class="logo-preview-row" style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+
+                        <img id="logoPreview" src="" alt="Current logo"
+                            style="width:80px; height:80px; object-fit:contain; background:#f4f1ec; border:1px solid #ddd; border-radius:8px; padding:8px;">
+
+                        <div class="logo-upload-controls">
+
+                            <label for="logoFileInput">Choose a logo image</label>
+
+                            <input type="file" id="logoFileInput" accept="image/jpeg,image/png,image/webp">
+
+                            <button type="button" id="saveLogoButton" class="btn btn-primary" disabled
+                                style="margin-left:0.75rem;">
+                                Save Logo
+                            </button>
+
+                            <p id="logoStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#777;"></p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <p class="coming-soon">More site settings will be added in future phases.</p>
 
             </section>
 
