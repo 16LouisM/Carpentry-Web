@@ -46,13 +46,6 @@ export async function isAdmin(uid) {
 // ==========================================
 // SITE SETTINGS
 // ==========================================
-//
-// One shared document, settings/site, holding site-wide fields that
-// the admin can edit — the logo now, and (in later phases) the "Who We
-// Are" text/image and contact details. Reading it never throws if the
-// document doesn't exist yet: it just returns {}, so callers should
-// treat every field as optional and fall back to whatever's already in
-// the HTML.
 
 const SITE_SETTINGS_REF = doc(db, "settings", "site");
 
@@ -111,6 +104,40 @@ export async function getProjects() {
         id: doc.id,
         ...doc.data()
     }));
+}
+
+export async function createProject({ title, category, imageUrl, imageAlt }) {
+
+    const projectsRef = collection(db, "projects");
+
+    return await addDoc(projectsRef, {
+        title: (title || "").trim(),
+        category: (category || "").trim(),
+        imageUrl: imageUrl || "",
+        imageAlt: (imageAlt || "").trim(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+    });
+}
+
+export async function updateProject(projectId, { title, category, imageUrl, imageAlt }) {
+
+    const projectRef = doc(db, "projects", projectId);
+
+    await updateDoc(projectRef, {
+        title: (title || "").trim(),
+        category: (category || "").trim(),
+        imageUrl: imageUrl || "",
+        imageAlt: (imageAlt || "").trim(),
+        updatedAt: serverTimestamp()
+    });
+}
+
+export async function deleteProject(projectId) {
+
+    const projectRef = doc(db, "projects", projectId);
+
+    await deleteDoc(projectRef);
 }
 
 

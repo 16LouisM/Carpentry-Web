@@ -133,6 +133,51 @@
                     Manage your portfolio projects here.
                 </p>
 
+                <button type="button" id="addProjectButton" class="btn btn-primary" style="margin-bottom:1.5rem;">
+                    + Add New Project
+                </button>
+
+                <div id="projectFormWrapper"
+                    style="display:none; margin-bottom:2rem; padding:1.5rem; border:1px solid #ddd; border-radius:8px; background:#faf8f5;">
+
+                    <h3 id="projectFormTitle">Add New Project</h3>
+
+                    <input type="hidden" id="projectFormId" value="">
+
+                    <div class="form-group">
+                        <label for="projectTitleInput">Title</label>
+                        <input type="text" id="projectTitleInput" placeholder="e.g. Display Cabinet & Wine Rack Unit">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="projectCategoryInput">Category</label>
+                        <input type="text" id="projectCategoryInput" placeholder="e.g. Cabinetry">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="projectImageAltInput">Photo Description (for accessibility)</label>
+                        <input type="text" id="projectImageAltInput"
+                            placeholder="e.g. Grey display cabinet with wine rack and cupboards">
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; margin-top:1rem;">
+
+                        <img id="projectImagePreview" src="" alt="Project photo preview"
+                            style="width:110px; height:80px; object-fit:cover; background:#f4f1ec; border:1px solid #ddd; border-radius:8px; display:none;">
+
+                        <input type="file" id="projectImageFileInput" accept="image/jpeg,image/png,image/webp">
+
+                    </div>
+
+                    <div style="margin-top:1.5rem; display:flex; gap:0.75rem;">
+                        <button type="button" id="saveProjectButton" class="btn btn-primary">Save Project</button>
+                        <button type="button" id="cancelProjectButton" class="btn btn-outline">Cancel</button>
+                    </div>
+
+                    <p id="projectFormStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#777;"></p>
+
+                </div>
+
                 <div id="projectsList">
                     Loading projects...
                 </div>
@@ -209,42 +254,23 @@
                         the top of your website.
                     </p>
 
-                    <div
-                        class="logo-preview-row"
-                        style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;"
-                    >
+                    <div class="logo-preview-row" style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
 
-                        <img
-                            id="logoPreview"
-                            src=""
-                            alt="Current logo"
-                            style="width:80px; height:80px; object-fit:contain; background:#f4f1ec; border:1px solid #ddd; border-radius:8px; padding:8px;"
-                        >
+                        <img id="logoPreview" src="" alt="Current logo"
+                            style="width:80px; height:80px; object-fit:contain; background:#f4f1ec; border:1px solid #ddd; border-radius:8px; padding:8px;">
 
                         <div class="logo-upload-controls">
 
                             <label for="logoFileInput">Choose a logo image</label>
 
-                            <input
-                                type="file"
-                                id="logoFileInput"
-                                accept="image/jpeg,image/png,image/webp"
-                            >
+                            <input type="file" id="logoFileInput" accept="image/jpeg,image/png,image/webp">
 
-                            <button
-                                type="button"
-                                id="saveLogoButton"
-                                class="btn btn-primary"
-                                disabled
-                                style="margin-left:0.75rem;"
-                            >
+                            <button type="button" id="saveLogoButton" class="btn btn-primary" disabled
+                                style="margin-left:0.75rem;">
                                 Save Logo
                             </button>
 
-                            <p
-                                id="logoStatus"
-                                style="margin-top:0.5rem; font-size:0.9rem; color:#777;"
-                            ></p>
+                            <p id="logoStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#777;"></p>
 
                         </div>
 
@@ -272,11 +298,7 @@
                             Heading
                         </label>
 
-                        <input
-                            type="text"
-                            id="aboutTitleInput"
-                            placeholder="A Family Tradition of Fine Woodworking"
-                        >
+                        <input type="text" id="aboutTitleInput" placeholder="A Family Tradition of Fine Woodworking">
 
                     </div>
 
@@ -287,48 +309,27 @@
                             paragraphs)
                         </label>
 
-                        <textarea
-                            id="aboutTextArea"
-                            rows="8"
-                            placeholder="Write each paragraph, leaving a blank line between them."
-                        ></textarea>
+                        <textarea id="aboutTextArea" rows="8"
+                            placeholder="Write each paragraph, leaving a blank line between them."></textarea>
 
                     </div>
 
-                    <div
-                        style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; margin-top:1rem;"
-                    >
+                    <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; margin-top:1rem;">
 
-                        <img
-                            id="aboutImagePreview"
-                            src=""
-                            alt="Current Who We Are photo"
-                            style="width:110px; height:80px; object-fit:cover; background:#f4f1ec; border:1px solid #ddd; border-radius:8px;"
-                        >
+                        <img id="aboutImagePreview" src="" alt="Current Who We Are photo"
+                            style="width:110px; height:80px; object-fit:cover; background:#f4f1ec; border:1px solid #ddd; border-radius:8px;">
 
                         <label for="aboutImageFileInput">Choose a Who We Are photo</label>
 
-                        <input
-                            type="file"
-                            id="aboutImageFileInput"
-                            accept="image/jpeg,image/png,image/webp"
-                        >
+                        <input type="file" id="aboutImageFileInput" accept="image/jpeg,image/png,image/webp">
 
                     </div>
 
-                    <button
-                        type="button"
-                        id="saveAboutButton"
-                        class="btn btn-primary"
-                        style="margin-top:1rem;"
-                    >
+                    <button type="button" id="saveAboutButton" class="btn btn-primary" style="margin-top:1rem;">
                         Save Who We Are Section
                     </button>
 
-                    <p
-                        id="aboutStatus"
-                        style="margin-top:0.5rem; font-size:0.9rem; color:#777;"
-                    ></p>
+                    <p id="aboutStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#777;"></p>
 
                 </div>
 
@@ -349,62 +350,34 @@
 
                     <div class="form-group">
                         <label for="contactAddressInput">Address</label>
-                        <input
-                            type="text"
-                            id="contactAddressInput"
-                            placeholder="2626 Block L, Soshanguve, 0152"
-                        >
+                        <input type="text" id="contactAddressInput" placeholder="2626 Block L, Soshanguve, 0152">
                     </div>
 
                     <div class="form-group">
                         <label for="contactPhoneInput">Phone</label>
-                        <input
-                            type="text"
-                            id="contactPhoneInput"
-                            placeholder="+27 73 779 9074"
-                        >
+                        <input type="text" id="contactPhoneInput" placeholder="+27 73 779 9074">
                     </div>
 
                     <div class="form-group">
                         <label for="contactEmailInput">Email</label>
-                        <input
-                            type="email"
-                            id="contactEmailInput"
-                            placeholder="modjadjiprojects@gmail.com"
-                        >
+                        <input type="email" id="contactEmailInput" placeholder="modjadjiprojects@gmail.com">
                     </div>
 
                     <div class="form-group">
                         <label for="contactHoursInput">Business Hours</label>
-                        <input
-                            type="text"
-                            id="contactHoursInput"
-                            placeholder="Mon–Fri: 8am–6pm | Sat: 9am–2pm"
-                        >
+                        <input type="text" id="contactHoursInput" placeholder="Mon–Fri: 8am–6pm | Sat: 9am–2pm">
                     </div>
 
                     <div class="form-group">
                         <label for="serviceAreaTextArea">Service Area Description</label>
-                        <textarea
-                            id="serviceAreaTextArea"
-                            rows="3"
-                            placeholder="We proudly serve..."
-                        ></textarea>
+                        <textarea id="serviceAreaTextArea" rows="3" placeholder="We proudly serve..."></textarea>
                     </div>
 
-                    <button
-                        type="button"
-                        id="saveContactButton"
-                        class="btn btn-primary"
-                        style="margin-top:1rem;"
-                    >
+                    <button type="button" id="saveContactButton" class="btn btn-primary" style="margin-top:1rem;">
                         Save Contact Details
                     </button>
 
-                    <p
-                        id="contactStatus"
-                        style="margin-top:0.5rem; font-size:0.9rem; color:#777;"
-                    ></p>
+                    <p id="contactStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#777;"></p>
 
                 </div>
 

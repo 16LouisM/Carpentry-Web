@@ -2,6 +2,9 @@
 
 import {
     getProjects,
+    createProject,
+    updateProject,
+    deleteProject,
     getServices,
     getAllTestimonials,
     updateTestimonialStatus,
@@ -48,6 +51,19 @@ const contactHoursInput = document.getElementById("contactHoursInput");
 const serviceAreaTextArea = document.getElementById("serviceAreaTextArea");
 const saveContactButton = document.getElementById("saveContactButton");
 const contactStatus = document.getElementById("contactStatus");
+
+const addProjectButton = document.getElementById("addProjectButton");
+const projectFormWrapper = document.getElementById("projectFormWrapper");
+const projectFormTitle = document.getElementById("projectFormTitle");
+const projectFormId = document.getElementById("projectFormId");
+const projectTitleInput = document.getElementById("projectTitleInput");
+const projectCategoryInput = document.getElementById("projectCategoryInput");
+const projectImageAltInput = document.getElementById("projectImageAltInput");
+const projectImageFileInput = document.getElementById("projectImageFileInput");
+const projectImagePreview = document.getElementById("projectImagePreview");
+const saveProjectButton = document.getElementById("saveProjectButton");
+const cancelProjectButton = document.getElementById("cancelProjectButton");
+const projectFormStatus = document.getElementById("projectFormStatus");
 
 
 // Set while a deliberate sign-out is in progress, so the auth watcher
@@ -201,10 +217,14 @@ async function loadDashboardData() {
 
 
 // ==========================================
-// PROJECTS
+// PROJECTS — DISPLAY
 // ==========================================
 
+let projectsCache = [];
+
 function displayProjects(projects) {
+
+    projectsCache = projects;
 
     const container = document.getElementById("projectsList");
 
@@ -226,15 +246,311 @@ function displayProjects(projects) {
     container.innerHTML = projects.map((project) => `
 
         <div class="admin-item">
-            <div>
-                <h3>${escapeHTML(project.title || "Untitled")}</h3>
-                <p>${escapeHTML(project.category || "")}</p>
+
+            <div style="display:flex; align-items:center; gap:1rem;">
+
+                ${project.imageUrl ? `
+                    <img
+                        src="${escapeHTML(project.imageUrl)}"
+                        alt=""
+                        style="width:60px; height:45px; object-fit:cover; border-radius:6px; flex-shrink:0;"
+                    >
+                ` : ""}
+
+                <div>
+                    <h3>${escapeHTML(project.title || "Untitled")}</h3>
+                    <p>${escapeHTML(project.category || "")}</p>
+                </div>
+
             </div>
+
+            <div style="display:flex; gap:0.5rem;">
+
+                <button
+                    type="button"
+                    class="action-button"
+                    data-project-action="edit"
+                    data-id="${escapeHTML(project.id)}"
+                >Edit</button>
+
+                <button
+                    type="button"
+                    class="action-button reject"
+                    data-project-action="delete"
+                    data-id="${escapeHTML(project.id)}"
+                >Delete</button>
+
+            </div>
+
         </div>
 
     `).join("");
 
 }
+
+
+// ==========================================
+// PROJECTS — ADD / EDIT FORM
+// ==========================================
+
+let editingProjectId = null;
+let selectedProjectImageFile = null;
+let currentProjectImageUrl = "";
+
+function openProjectForm(project) {
+
+    if (!projectFormWrapper) {
+        return;
+    }
+
+    if (project) {
+
+        editingProjectId = project.id;
+        currentProjectImageUrl = project.imageUrl || "";
+
+        if (projectFormTitle) projectFormTitle.textContent = "Edit Project";
+        if (projectFormId) projectFormId.value = project.id;
+        if (projectTitleInput) projectTitleInput.value = project.title || "";
+        if (projectCategoryInput) projectCategoryInput.value = project.category || "";
+        if (projectImageAltInput) projectImageAltInput.value = project.imageAlt || "";
+
+        if (projectImagePreview) {
+
+            if (project.imageUrl) {
+                projectImagePreview.src = project.imageUrl;
+                projectImagePreview.style.display = "block";
+            } else {
+                projectImagePreview.style.display = "none";
+            }
+        }
+
+    } else {
+
+        editingProjectId = null;
+        currentProjectImageUrl = "";
+
+        if (projectFormTitle) projectFormTitle.textContent = "Add New Project";
+        if (projectFormId) projectFormId.value = "";
+        if (projectTitleInput) projectTitleInput.value = "";
+        if (projectCategoryInput) projectCategoryInput.value = "";
+        if (projectImageAltInput) projectImageAltInput.value = "";
+
+        if (projectImagePreview) {
+            projectImagePreview.src = "";
+            projectImagePreview.style.display = "none";
+        }
+    }
+
+    selectedProjectImageFile = null;
+
+    if (projectImageFileInput) {
+        projectImageFileInput.value = "";
+    }
+
+    if (projectFormStatus) {
+        projectFormStatus.textContent = "";
+    }
+
+    projectFormWrapper.style.display = "block";
+    projectFormWrapper.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+}
+
+function closeProjectForm() {
+
+    if (projectFormWrapper) {
+        projectFormWrapper.style.display = "none";
+    }
+
+    editingProjectId = null;
+    selectedProjectImageFile = null;
+    currentProjectImageUrl = "";
+}
+
+
+if (addProjectButton) {
+
+    addProjectButton.addEventListener("click", () => {
+        openProjectForm(null);
+    });
+
+}
+
+
+if (cancelProjectButton) {
+
+    cancelProjectButton.addEventListener("click", () => {
+        closeProjectForm();
+    });
+
+}
+
+
+if (projectImageFileInput) {
+
+    projectImageFileInput.addEventListener("change", () => {
+
+        const file = projectImageFileInput.files[0];
+
+        selectedProjectImageFile = file || null;
+
+        if (file && projectImagePreview) {
+            projectImagePreview.src = URL.createObjectURL(file);
+            projectImagePreview.style.display = "block";
+        }
+
+    });
+
+}
+
+
+if (saveProjectButton) {
+
+    saveProjectButton.addEventListener("click", async () => {
+
+        const title = projectTitleInput ? projectTitleInput.value.trim() : "";
+
+        if (!title) {
+
+            if (projectFormStatus) {
+                projectFormStatus.textContent = "Please enter a project title.";
+            }
+
+            return;
+        }
+
+        saveProjectButton.disabled = true;
+
+        if (projectFormStatus) {
+            projectFormStatus.textContent = "Saving...";
+        }
+
+        try {
+
+            let imageUrl = currentProjectImageUrl;
+
+            if (selectedProjectImageFile) {
+
+                const formData = new FormData();
+                formData.append("image", selectedProjectImageFile);
+
+                const uploadResponse = await adminFetch(
+                    "/api/admin/images",
+                    { method: "POST", body: formData }
+                );
+
+                const uploadResult = await uploadResponse.json();
+
+                if (!uploadResponse.ok || !uploadResult.success) {
+                    throw new Error(
+                        uploadResult.message || "Photo upload failed."
+                    );
+                }
+
+                imageUrl = uploadResult.image.url;
+            }
+
+            const fields = {
+                title,
+                category: projectCategoryInput ? projectCategoryInput.value.trim() : "",
+                imageAlt: projectImageAltInput ? projectImageAltInput.value.trim() : "",
+                imageUrl
+            };
+
+            if (editingProjectId) {
+                await updateProject(editingProjectId, fields);
+            } else {
+                await createProject(fields);
+            }
+
+            closeProjectForm();
+
+            await loadDashboardData();
+
+        } catch (error) {
+
+            console.error("Project save error:", error);
+
+            if (projectFormStatus) {
+                projectFormStatus.textContent =
+                    error.message || "Unable to save this project.";
+            }
+
+        } finally {
+
+            saveProjectButton.disabled = false;
+        }
+
+    });
+
+}
+
+
+// ==========================================
+// PROJECTS — EDIT / DELETE (delegated)
+// ==========================================
+
+(function attachProjectActions() {
+
+    const container = document.getElementById("projectsList");
+
+    if (!container) {
+        return;
+    }
+
+    container.addEventListener("click", async (event) => {
+
+        const button = event.target.closest("[data-project-action]");
+
+        if (!button || !container.contains(button)) {
+            return;
+        }
+
+        const action = button.dataset.projectAction;
+        const id = button.dataset.id;
+
+        if (action === "edit") {
+
+            const project = projectsCache.find((item) => item.id === id);
+
+            if (project) {
+                openProjectForm(project);
+            }
+
+            return;
+        }
+
+        if (action === "delete") {
+
+            const confirmed = confirm(
+                "Delete this project permanently? This does not delete its photo from Cloudinary."
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            button.disabled = true;
+
+            try {
+
+                await deleteProject(id);
+                await loadDashboardData();
+
+            } catch (error) {
+
+                console.error("Project delete error:", error);
+
+                alert("The project could not be deleted.");
+
+                button.disabled = false;
+            }
+
+        }
+
+    });
+
+})();
 
 
 // ==========================================
@@ -484,7 +800,7 @@ function attachTestimonialActions() {
 
 
 // ==========================================
-// SITE SETTINGS — SHARED STATE
+// SITE SETTINGS
 // ==========================================
 
 let selectedLogoFile = null;
@@ -506,19 +822,9 @@ async function initSettingsPanel() {
         return;
     }
 
-
-    // --------------------------------------
-    // LOGO
-    // --------------------------------------
-
     if (logoPreview && settings.logoUrl) {
         logoPreview.src = settings.logoUrl;
     }
-
-
-    // --------------------------------------
-    // WHO WE ARE
-    // --------------------------------------
 
     if (aboutTitleInput && settings.aboutTitle) {
         aboutTitleInput.value = settings.aboutTitle;
@@ -536,11 +842,6 @@ async function initSettingsPanel() {
             aboutImagePreview.src = settings.aboutImageUrl;
         }
     }
-
-
-    // --------------------------------------
-    // CONTACT DETAILS
-    // --------------------------------------
 
     if (contactAddressInput && settings.contactAddress) {
         contactAddressInput.value = settings.contactAddress;
@@ -564,10 +865,6 @@ async function initSettingsPanel() {
 
 }
 
-
-// ==========================================
-// LOGO — SAVE
-// ==========================================
 
 if (logoFileInput) {
 
@@ -649,10 +946,6 @@ if (saveLogoButton) {
 
 }
 
-
-// ==========================================
-// WHO WE ARE — SAVE
-// ==========================================
 
 if (aboutImageFileInput) {
 
@@ -745,13 +1038,6 @@ if (saveAboutButton) {
 
 }
 
-
-// ==========================================
-// CONTACT DETAILS — SAVE
-// ==========================================
-//
-// No image involved here, so this is a straightforward Firestore write
-// with no Cloudinary step.
 
 if (saveContactButton) {
 
