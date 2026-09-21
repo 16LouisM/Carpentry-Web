@@ -739,6 +739,117 @@
 
             </div>
 
+
+            <!-- =====================================================
+                 LEAVE A REVIEW
+            ====================================================== -->
+            <div class="review-form-section" id="reviewFormSection" style="margin-top:3rem; max-width:600px;">
+
+                <h3>
+                    Share Your Experience
+                </h3>
+
+                <form id="reviewForm" novalidate>
+
+                    <!-- Honeypot — invisible to real visitors, catches bots -->
+                    <input
+                        type="text"
+                        id="reviewHoneypot"
+                        name="companyWebsite"
+                        autocomplete="off"
+                        tabindex="-1"
+                        style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;"
+                    >
+
+                    <div class="form-group">
+
+                        <label for="reviewerName">
+                            Your Name *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="reviewerName"
+                            name="reviewerName"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+                            Your Rating *
+                        </label>
+
+                        <div
+                            id="starRatingInput"
+                            role="radiogroup"
+                            aria-label="Star rating"
+                            style="font-size:1.8rem; display:flex; gap:0.25rem;"
+                        >
+
+                            <button type="button" class="star-btn" data-value="1" aria-label="1 star"
+                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+
+                            <button type="button" class="star-btn" data-value="2" aria-label="2 stars"
+                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+
+                            <button type="button" class="star-btn" data-value="3" aria-label="3 stars"
+                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+
+                            <button type="button" class="star-btn" data-value="4" aria-label="4 stars"
+                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+
+                            <button type="button" class="star-btn" data-value="5" aria-label="5 stars"
+                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+
+                        </div>
+
+                        <input type="hidden" id="reviewRating" name="reviewRating" value="">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="reviewText">
+                            Your Review *
+                        </label>
+
+                        <textarea
+                            id="reviewText"
+                            name="reviewText"
+                            rows="4"
+                            required
+                        ></textarea>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="reviewSubmitBtn"
+                    >
+                        Submit Review
+                    </button>
+
+                    <p
+                        id="reviewFormMessage"
+                        aria-live="polite"
+                        style="margin-top:0.5rem; color:#a33;"
+                    ></p>
+
+                </form>
+
+                <div class="review-form-success" id="reviewFormSuccess" style="display:none;">
+                    <p>
+                        Thank you for your review! It will appear on our
+                        site once approved.
+                    </p>
+                </div>
+
+            </div>
+
         </div>
 
     </section>
@@ -1120,6 +1231,8 @@
     <script src="js/smooth-scroll.js"></script>
     <script type="module" src="js/projects.js"></script>
     <script type="module" src="js/site-settings.js"></script>
+    <script type="module" src="js/testimonials.js"></script>
+    <script type="module" src="js/review-form.js"></script>
 
 </body>
 
