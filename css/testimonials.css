@@ -65,3 +65,47 @@
             color: var(--oak-deep);
             letter-spacing: 2px;
         }
+
+        /* Read-only star display (testimonial cards): outline by
+           default, solid fill only on the stars that count toward the
+           rating. Lucide copies the class from the <i data-lucide>
+           placeholder onto the <svg> it generates, so this matches
+           both the raw placeholder and the rendered icon. */
+        .stars i svg,
+        .stars svg {
+            fill: none;
+            stroke: currentColor;
+        }
+
+        .stars i.filled svg,
+        .stars svg.filled {
+            fill: currentColor;
+        }
+
+        /* Interactive star-rating picker (review submission form) */
+        .star-rating-input {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.15rem;
+            color: var(--oak-deep);
+            line-height: 0;
+        }
+
+        .star-btn svg {
+            width: 1.8rem;
+            height: 1.8rem;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            transition: fill 0.15s ease;
+        }
+
+        .star-btn.filled svg {
+            fill: currentColor;
+        }

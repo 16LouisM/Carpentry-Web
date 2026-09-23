@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const starValue = Number(btn.dataset.value);
 
-            btn.style.color = starValue <= value ? "#d9a441" : "#ccc";
+            btn.classList.toggle("filled", starValue <= value);
         });
     }
 
@@ -66,14 +66,14 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
 
         // Honeypot: a real visitor never fills this hidden field.
-        // If it's filled, quietly do nothing rather than tipping off
-        // whatever filled it in.
         if (honeypot && honeypot.value.trim() !== "") {
             return;
         }
 
         const clientName = document.getElementById("reviewerName").value.trim();
         const review = document.getElementById("reviewText").value.trim();
+        const locationEl = document.getElementById("reviewerLocation");
+        const location = locationEl ? locationEl.value.trim() : "";
         const rating = currentRating;
 
         if (!clientName || !review) {
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
-            await createTestimonial({ clientName, review, rating });
+            await createTestimonial({ clientName, review, rating, location });
 
             form.style.display = "none";
 

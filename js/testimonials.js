@@ -18,8 +18,6 @@ async function loadApprovedTestimonials() {
         const testimonials = await getApprovedTestimonials();
 
         if (!testimonials.length) {
-            // No approved reviews yet — keep the hand-picked static
-            // cards already in index.html rather than showing nothing.
             return;
         }
 
@@ -34,7 +32,6 @@ async function loadApprovedTestimonials() {
     } catch (error) {
 
         console.error("Could not load testimonials from Firestore:", error);
-        // Static fallback markup stays as-is.
     }
 
 }
@@ -44,11 +41,15 @@ function testimonialCardHTML(testimonial) {
 
     const clientName = escapeHTML(testimonial.clientName || "Anonymous");
     const review = escapeHTML(testimonial.review || "");
+    const location = escapeHTML(testimonial.location || "");
     const initials = getInitials(testimonial.clientName || "Anonymous");
     const ratingCount = Math.max(0, Math.min(5, Number(testimonial.rating || 0)));
 
-    const starIcons = Array.from({ length: ratingCount })
-        .map(() => `<i data-lucide="star"></i>`)
+    const starIcons = Array.from({ length: 5 })
+        .map((_, index) => {
+            const filledClass = index < ratingCount ? " filled" : "";
+            return `<i data-lucide="star" class="star-icon${filledClass}"></i>`;
+        })
         .join("");
 
     return `
@@ -64,6 +65,8 @@ function testimonialCardHTML(testimonial) {
                 <div>
 
                     <strong>${clientName}</strong>
+
+                    ${location ? `<small>${location}</small>` : ""}
 
                     <div class="stars" aria-label="${ratingCount} out of 5 stars">
                         ${starIcons}
