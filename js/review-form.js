@@ -72,8 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const clientName = document.getElementById("reviewerName").value.trim();
         const review = document.getElementById("reviewText").value.trim();
+
         const locationEl = document.getElementById("reviewerLocation");
         const location = locationEl ? locationEl.value.trim() : "";
+
+        const roleEl = document.getElementById("reviewerRole");
+        const role = roleEl ? roleEl.value.trim() : "";
+
         const rating = currentRating;
 
         if (!clientName || !review) {
@@ -92,13 +97,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
-            await createTestimonial({ clientName, review, rating, location });
+            await createTestimonial({
+                clientName,
+                review,
+                rating,
+                location,
+                role
+            });
 
             form.style.display = "none";
 
             if (successEl) {
                 successEl.style.display = "block";
             }
+
+            // Restore the form after 5 seconds so a visitor can leave
+            // another review without reloading the page.
+            setTimeout(() => {
+
+                if (successEl) {
+                    successEl.style.display = "none";
+                }
+
+                form.style.display = "";
+                form.reset();
+
+                currentRating = 0;
+                ratingInput.value = "";
+                paintStars(0);
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit Review";
+
+            }, 5000);
 
         } catch (error) {
 

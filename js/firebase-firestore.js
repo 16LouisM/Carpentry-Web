@@ -192,7 +192,8 @@ export async function createTestimonial({
     clientName,
     review,
     rating,
-    location
+    location,
+    role
 }) {
     const testimonialsRef = collection(db, "testimonials");
 
@@ -201,6 +202,7 @@ export async function createTestimonial({
         review: review.trim(),
         rating: Number(rating),
         location: (location || "").trim(),
+        role: (role || "").trim(),
         status: "pending",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()

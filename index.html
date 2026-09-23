@@ -641,11 +641,11 @@
 
                             <div class="stars" aria-label="5 out of 5 stars">
 
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
 
                             </div>
 
@@ -682,11 +682,11 @@
 
                             <div class="stars" aria-label="5 out of 5 stars">
 
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
 
                             </div>
 
@@ -723,11 +723,11 @@
 
                             <div class="stars" aria-label="5 out of 5 stars">
 
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
-                                <i data-lucide="star"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
+                                <i data-lucide="star" class="filled"></i>
 
                             </div>
 
@@ -778,6 +778,44 @@
 
                     <div class="form-group">
 
+                        <label for="reviewerRole">
+                            What best describes you?
+                        </label>
+
+                        <select id="reviewerRole" name="reviewerRole">
+                            <option value="">— Select an option —</option>
+                            <option value="Homeowner">Homeowner</option>
+                            <option value="Business Owner">Business Owner</option>
+                            <option value="Interior Designer">Interior Designer</option>
+                            <option value="Architect">Architect</option>
+                            <option value="Property Developer">Property Developer</option>
+                            <option value="Contractor / Builder">Contractor / Builder</option>
+                            <option value="Landlord / Property Owner">Landlord / Property Owner</option>
+                            <option value="Estate Agent">Estate Agent</option>
+                            <option value="Hotel / Lodge / Hospitality">Hotel / Lodge / Hospitality</option>
+                            <option value="Office / Corporate">Office / Corporate</option>
+                            <option value="Other">Other</option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="reviewerLocation">
+                            Your Location (optional)
+                        </label>
+
+                        <input
+                            type="text"
+                            id="reviewerLocation"
+                            name="reviewerLocation"
+                            placeholder="e.g. Soshanguve, Gauteng"
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
                         <label>
                             Your Rating *
                         </label>
@@ -786,23 +824,18 @@
                             id="starRatingInput"
                             role="radiogroup"
                             aria-label="Star rating"
-                            style="font-size:1.8rem; display:flex; gap:0.25rem;"
+                            class="star-rating-input"
                         >
 
-                            <button type="button" class="star-btn" data-value="1" aria-label="1 star"
-                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+                            <button type="button" class="star-btn" data-value="1" aria-label="1 star"><i data-lucide="star"></i></button>
 
-                            <button type="button" class="star-btn" data-value="2" aria-label="2 stars"
-                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+                            <button type="button" class="star-btn" data-value="2" aria-label="2 stars"><i data-lucide="star"></i></button>
 
-                            <button type="button" class="star-btn" data-value="3" aria-label="3 stars"
-                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+                            <button type="button" class="star-btn" data-value="3" aria-label="3 stars"><i data-lucide="star"></i></button>
 
-                            <button type="button" class="star-btn" data-value="4" aria-label="4 stars"
-                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+                            <button type="button" class="star-btn" data-value="4" aria-label="4 stars"><i data-lucide="star"></i></button>
 
-                            <button type="button" class="star-btn" data-value="5" aria-label="5 stars"
-                                style="background:none; border:none; cursor:pointer; color:#ccc;">★</button>
+                            <button type="button" class="star-btn" data-value="5" aria-label="5 stars"><i data-lucide="star"></i></button>
 
                         </div>
 

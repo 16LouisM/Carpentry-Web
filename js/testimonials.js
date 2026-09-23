@@ -41,9 +41,15 @@ function testimonialCardHTML(testimonial) {
 
     const clientName = escapeHTML(testimonial.clientName || "Anonymous");
     const review = escapeHTML(testimonial.review || "");
-    const location = escapeHTML(testimonial.location || "");
     const initials = getInitials(testimonial.clientName || "Anonymous");
     const ratingCount = Math.max(0, Math.min(5, Number(testimonial.rating || 0)));
+
+    // "Homeowner, Soshanguve" — role and location joined into one line,
+    // matching the original static cards. Either can be missing.
+    const subtitle = [testimonial.role, testimonial.location]
+        .filter((part) => part && String(part).trim())
+        .map((part) => escapeHTML(part))
+        .join(", ");
 
     const starIcons = Array.from({ length: 5 })
         .map((_, index) => {
@@ -66,7 +72,7 @@ function testimonialCardHTML(testimonial) {
 
                     <strong>${clientName}</strong>
 
-                    ${location ? `<small>${location}</small>` : ""}
+                    ${subtitle ? `<small>${subtitle}</small>` : ""}
 
                     <div class="stars" aria-label="${ratingCount} out of 5 stars">
                         ${starIcons}
