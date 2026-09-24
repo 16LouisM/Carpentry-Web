@@ -381,6 +381,31 @@
 
                 </div>
 
+                <div class="settings-block" style="margin-top:2rem;">
+
+                    <h3>Workshop Photo</h3>
+
+                    <p>
+                        This photo appears next to your contact form, replacing the
+                        "Workshop Photo Coming Soon" placeholder once you set one.
+                    </p>
+
+                    <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+
+                        <img id="workshopPhotoPreview" src="" alt="Current workshop photo"
+                            style="width:110px; height:80px; object-fit:cover; background:#f4f1ec; border:1px solid #ddd; border-radius:8px; display:none;">
+
+                        <input type="file" id="workshopPhotoFileInput" accept="image/jpeg,image/png,image/webp">
+
+                        <button type="button" id="saveWorkshopPhotoButton" class="btn btn-primary" disabled>
+                            Save Workshop Photo
+                        </button>
+
+                    </div>
+
+                    <p id="workshopPhotoStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#777;"></p>
+
+                </div>
 
                 <p class="coming-soon">
                     More site settings will be added in future phases.

@@ -52,6 +52,11 @@ const serviceAreaTextArea = document.getElementById("serviceAreaTextArea");
 const saveContactButton = document.getElementById("saveContactButton");
 const contactStatus = document.getElementById("contactStatus");
 
+const workshopPhotoFileInput = document.getElementById("workshopPhotoFileInput");
+const workshopPhotoPreview = document.getElementById("workshopPhotoPreview");
+const saveWorkshopPhotoButton = document.getElementById("saveWorkshopPhotoButton");
+const workshopPhotoStatus = document.getElementById("workshopPhotoStatus");
+
 const addProjectButton = document.getElementById("addProjectButton");
 const projectFormWrapper = document.getElementById("projectFormWrapper");
 const projectFormTitle = document.getElementById("projectFormTitle");
@@ -185,33 +190,67 @@ navItems.forEach((button) => {
 
 async function loadDashboardData() {
 
-    try {
+    // Each collection is fetched independently: a broken query on one
+    // (e.g. a missing Firestore index) must never prevent the other
+    // two from loading and rendering. Promise.all() would fail the
+    // whole batch if any single promise rejected — Promise.allSettled
+    // does not.
 
-        const [projects, services, testimonials] = await Promise.all([
-            getProjects(),
-            getServices(),
-            getAllTestimonials()
-        ]);
+    const [
+        projectsResult,
+        servicesResult,
+        testimonialsResult
+    ] = await Promise.allSettled([
+        getProjects(),
+        getServices(),
+        getAllTestimonials()
+    ]);
 
-        document.getElementById("projectCount").textContent =
-            projects.length;
+    const projects = projectsResult.status === "fulfilled"
+        ? projectsResult.value
+        : [];
 
-        document.getElementById("serviceCount").textContent =
-            services.length;
+    const services = servicesResult.status === "fulfilled"
+        ? servicesResult.value
+        : [];
 
-        document.getElementById("pendingCount").textContent =
-            testimonials.filter((item) => item.status === "pending").length;
+    const testimonials = testimonialsResult.status === "fulfilled"
+        ? testimonialsResult.value
+        : [];
 
-        document.getElementById("approvedCount").textContent =
-            testimonials.filter((item) => item.status === "approved").length;
-
-        displayProjects(projects);
-        displayServices(services);
-
-    } catch (error) {
-
-        console.error("Dashboard loading error:", error);
+    if (projectsResult.status === "rejected") {
+        console.error("Could not load projects:", projectsResult.reason);
     }
+
+    if (servicesResult.status === "rejected") {
+        console.error("Could not load services:", servicesResult.reason);
+    }
+
+    if (testimonialsResult.status === "rejected") {
+        console.error("Could not load testimonials:", testimonialsResult.reason);
+    }
+
+    document.getElementById("projectCount").textContent =
+        projectsResult.status === "fulfilled" ? projects.length : "—";
+
+    document.getElementById("serviceCount").textContent =
+        servicesResult.status === "fulfilled" ? services.length : "—";
+
+    document.getElementById("pendingCount").textContent =
+        testimonialsResult.status === "fulfilled"
+            ? testimonials.filter((item) => item.status === "pending").length
+            : "—";
+
+    document.getElementById("approvedCount").textContent =
+        testimonialsResult.status === "fulfilled"
+            ? testimonials.filter((item) => item.status === "approved").length
+            : "—";
+
+    // Projects renders even if Services or Testimonials failed — this is
+    // the fix for the "Edit form opens empty" bug: projectsCache now
+    // gets populated as long as getProjects() itself succeeds.
+    displayProjects(projects);
+    displayServices(services);
 
 }
 
@@ -806,6 +845,8 @@ function attachTestimonialActions() {
 let selectedLogoFile = null;
 let selectedAboutImageFile = null;
 let currentAboutImageUrl = "";
+let selectedWorkshopPhotoFile = null;
+let currentWorkshopPhotoUrl = "";
 
 
 async function initSettingsPanel() {
@@ -861,6 +902,12 @@ async function initSettingsPanel() {
 
     if (serviceAreaTextArea && settings.serviceAreaText) {
         serviceAreaTextArea.value = settings.serviceAreaText;
+    }
+
+    if (workshopPhotoPreview && settings.workshopPhotoUrl) {
+        currentWorkshopPhotoUrl = settings.workshopPhotoUrl;
+        workshopPhotoPreview.src = settings.workshopPhotoUrl;
+        workshopPhotoPreview.style.display = "block";
     }
 
 }
@@ -1085,6 +1132,98 @@ if (saveContactButton) {
         } finally {
 
             saveContactButton.disabled = false;
+        }
+
+    });
+
+}
+
+
+// ==========================================
+// WORKSHOP PHOTO — SAVE
+// ==========================================
+
+if (workshopPhotoFileInput) {
+
+    workshopPhotoFileInput.addEventListener("change", () => {
+
+        const file = workshopPhotoFileInput.files[0];
+
+        selectedWorkshopPhotoFile = file || null;
+
+        if (file && workshopPhotoPreview) {
+            workshopPhotoPreview.src = URL.createObjectURL(file);
+            workshopPhotoPreview.style.display = "block";
+        }
+
+        if (saveWorkshopPhotoButton) {
+            saveWorkshopPhotoButton.disabled = !file;
+        }
+
+        if (workshopPhotoStatus) {
+            workshopPhotoStatus.textContent = "";
+        }
+
+    });
+
+}
+
+
+if (saveWorkshopPhotoButton) {
+
+    saveWorkshopPhotoButton.addEventListener("click", async () => {
+
+        if (!selectedWorkshopPhotoFile) {
+            return;
+        }
+
+        saveWorkshopPhotoButton.disabled = true;
+
+        if (workshopPhotoStatus) {
+            workshopPhotoStatus.textContent = "Uploading...";
+        }
+
+        try {
+
+            const formData = new FormData();
+            formData.append("image", selectedWorkshopPhotoFile);
+
+            const uploadResponse = await adminFetch(
+                "/api/admin/images",
+                { method: "POST", body: formData }
+            );
+
+            const uploadResult = await uploadResponse.json();
+
+            if (!uploadResponse.ok || !uploadResult.success) {
+                throw new Error(uploadResult.message || "Upload failed.");
+            }
+
+            await updateSiteSettings({
+                workshopPhotoUrl: uploadResult.image.url
+            });
+
+            currentWorkshopPhotoUrl = uploadResult.image.url;
+
+            if (workshopPhotoStatus) {
+                workshopPhotoStatus.textContent = "Workshop photo saved.";
+            }
+
+            selectedWorkshopPhotoFile = null;
+            workshopPhotoFileInput.value = "";
+
+        } catch (error) {
+
+            console.error("Workshop photo save error:", error);
+
+            if (workshopPhotoStatus) {
+                workshopPhotoStatus.textContent =
+                    error.message || "Unable to save this photo.";
+            }
+
+        } finally {
+
+            saveWorkshopPhotoButton.disabled = true;
         }
 
     });

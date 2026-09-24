@@ -1,7 +1,8 @@
 // js/site-settings.js
 //
 // Applies admin-editable site-wide settings to the public homepage:
-// logo, "Who We Are" content, and now Contact Details.
+// logo, "Who We Are" content, Contact Details, and now the workshop
+// photo next to the contact form.
 //
 // Every field is optional — if settings/site doesn't have it yet, the
 // existing static HTML is left exactly as it is.
@@ -171,6 +172,44 @@ async function applySiteSettings() {
 
             if (serviceAreaEl) {
                 serviceAreaEl.textContent = settings.serviceAreaText;
+            }
+        }
+
+
+        // --------------------------------------
+        // WORKSHOP PHOTO
+        // --------------------------------------
+        //
+        // Swaps the "Workshop Photo Coming Soon" placeholder for a real
+        // photo once one is set. If no photo has been uploaded yet, the
+        // static placeholder stays exactly as it is.
+
+        if (settings.workshopPhotoUrl) {
+
+            const placeholderIcon =
+                document.getElementById("workshopPhotoPlaceholder");
+
+            const placeholderText =
+                document.getElementById("workshopPhotoPlaceholderText");
+
+            const photoImg = document.getElementById("workshopPhotoImg");
+
+            if (placeholderIcon) {
+                placeholderIcon.style.display = "none";
+            }
+
+            if (placeholderText) {
+                placeholderText.style.display = "none";
+            }
+
+            if (photoImg) {
+
+                photoImg.src = settings.workshopPhotoUrl;
+                photoImg.style.display = "block";
+
+                if (settings.workshopPhotoAlt) {
+                    photoImg.alt = settings.workshopPhotoAlt;
+                }
             }
         }
 
