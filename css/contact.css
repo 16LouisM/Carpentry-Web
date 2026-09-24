@@ -134,8 +134,9 @@ a.contact-detail-link:focus-visible .cd-icon {
 }
 
 .image-placeholder {
+    align-self: stretch;
     width: 100%;
-    height: 100%;
+    height: 90.8%;
     min-height: 300px;
     display: flex;
     flex-direction: column;
@@ -151,6 +152,7 @@ a.contact-detail-link:focus-visible .cd-icon {
     letter-spacing: 0.03em;
     text-transform: uppercase;
 }
+
 
 .image-placeholder-icon {
     width: 56px;

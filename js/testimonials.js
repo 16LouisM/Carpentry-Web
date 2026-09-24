@@ -44,12 +44,12 @@ function testimonialCardHTML(testimonial) {
     const initials = getInitials(testimonial.clientName || "Anonymous");
     const ratingCount = Math.max(0, Math.min(5, Number(testimonial.rating || 0)));
 
-    // "Homeowner, Soshanguve" — role and location joined into one line,
-    // matching the original static cards. Either can be missing.
+    // "Homeowner | Vanderbijlpark, Jozi" — role and location joined
+    // with a pipe, matching the site's format. Either can be missing.
     const subtitle = [testimonial.role, testimonial.location]
         .filter((part) => part && String(part).trim())
         .map((part) => escapeHTML(part))
-        .join(", ");
+        .join(" | ");
 
     const starIcons = Array.from({ length: 5 })
         .map((_, index) => {
