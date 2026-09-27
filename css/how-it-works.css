@@ -1,0 +1,58 @@
+/* =========================================
+   HOW IT WORKS
+========================================= */
+
+.steps-list {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+    display: grid;
+    gap: 2.5rem;
+}
+
+.step-item {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.step-number {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--charcoal);
+    color: var(--brass, #d29a69);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.step-content h3 {
+    font-family: var(--font-display);
+    color: var(--charcoal);
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem;
+}
+
+.step-content p {
+    color: var(--umber-mid);
+    line-height: 1.7;
+    margin: 0;
+}
+
+.step-connector {
+    width: 2px;
+    flex: 1;
+    background: var(--line, #ded2c0);
+    margin: 0 auto;
+    min-height: 2rem;
+}
+
+.how-it-works-cta {
+    text-align: center;
+    padding: 0 1.5rem 5rem;
+}
