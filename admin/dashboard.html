@@ -407,6 +407,37 @@
 
                 </div>
 
+                <div class="settings-block" style="margin-top:2rem;">
+
+                    <h3>Review Form Image</h3>
+
+                    <p>
+                        Optional photo shown above the client review form on your
+                        homepage.
+                    </p>
+
+                    <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+
+                        <img id="reviewImagePreview" src="" alt="Current review form image"
+                            style="width:110px; height:80px; object-fit:cover; background:#f4f1ec; border:1px solid #ddd; border-radius:8px; display:none;">
+
+                        <input type="file" id="reviewImageFileInput" accept="image/jpeg,image/png,image/webp">
+
+                        <button type="button" id="saveReviewImageButton" class="btn btn-primary" disabled>
+                            Save Image
+                        </button>
+
+                        <button type="button" id="deleteReviewImageButton" class="btn btn-outline"
+                            style="display:none;">
+                            Remove Image
+                        </button>
+
+                    </div>
+
+                    <p id="reviewImageStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#777;"></p>
+
+                </div>
+
                 <p class="coming-soon">
                     More site settings will be added in future phases.
                 </p>

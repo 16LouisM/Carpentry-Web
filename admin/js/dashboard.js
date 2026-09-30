@@ -847,9 +847,24 @@ let selectedAboutImageFile = null;
 let currentAboutImageUrl = "";
 let selectedWorkshopPhotoFile = null;
 let currentWorkshopPhotoUrl = "";
+let selectedReviewImageFile = null;
+let currentReviewImageUrl = "";
+let currentReviewImagePublicId = "";
 
 
 async function initSettingsPanel() {
+
+    // Hidden by default, synchronously, before any async fetch even
+    // starts. An <img> with src="" tries to load the page itself as
+    // an image and shows a broken-image icon — this prevents that
+    // flash (or permanent broken state, if the fetch below fails)
+    // regardless of what the HTML's own inline style says.
+    [logoPreview, aboutImagePreview, workshopPhotoPreview, reviewImagePreview]
+        .forEach((img) => {
+            if (img) {
+                img.style.display = "none";
+            }
+        });
 
     let settings = {};
 
@@ -865,6 +880,7 @@ async function initSettingsPanel() {
 
     if (logoPreview && settings.logoUrl) {
         logoPreview.src = settings.logoUrl;
+        logoPreview.style.display = "block";
     }
 
     if (aboutTitleInput && settings.aboutTitle) {
@@ -908,6 +924,21 @@ async function initSettingsPanel() {
         currentWorkshopPhotoUrl = settings.workshopPhotoUrl;
         workshopPhotoPreview.src = settings.workshopPhotoUrl;
         workshopPhotoPreview.style.display = "block";
+    }
+
+    if (settings.reviewFormImageUrl) {
+
+        currentReviewImageUrl = settings.reviewFormImageUrl;
+        currentReviewImagePublicId = settings.reviewFormImagePublicId || "";
+
+        if (reviewImagePreview) {
+            reviewImagePreview.src = settings.reviewFormImageUrl;
+            reviewImagePreview.style.display = "block";
+        }
+
+        if (deleteReviewImageButton) {
+            deleteReviewImageButton.style.display = "inline-block";
+        }
     }
 
 }
@@ -1224,6 +1255,204 @@ if (saveWorkshopPhotoButton) {
         } finally {
 
             saveWorkshopPhotoButton.disabled = true;
+        }
+
+    });
+
+}
+
+
+// ==========================================
+// REVIEW FORM IMAGE — SAVE / DELETE
+// ==========================================
+//
+// Unlike Logo/Who We Are/Workshop Photo, this one supports true
+// deletion: removing it here also deletes the file from Cloudinary,
+// not just unlinking it from the site. Replacing it does the same —
+// the old image is deleted once the new one is confirmed uploaded, so
+// Cloudinary storage doesn't quietly fill up with orphaned photos.
+
+if (reviewImageFileInput) {
+
+    reviewImageFileInput.addEventListener("change", () => {
+
+        const file = reviewImageFileInput.files[0];
+
+        selectedReviewImageFile = file || null;
+
+        if (file && reviewImagePreview) {
+            reviewImagePreview.src = URL.createObjectURL(file);
+            reviewImagePreview.style.display = "block";
+            saveReviewImageButton.disabled = false;
+        } else {
+            saveReviewImageButton.disabled = true;
+        }
+
+        if (reviewImageStatus) {
+            reviewImageStatus.textContent = "";
+        }
+
+    });
+
+}
+
+
+async function deleteCloudinaryImage(publicId) {
+
+    if (!publicId) {
+        return;
+    }
+
+    try {
+
+        await adminFetch("/api/admin/images", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ publicId })
+        });
+
+    } catch (error) {
+
+        // Not fatal — the site's copy of the URL is what actually
+        // matters; a leftover Cloudinary file is a minor cleanup
+        // issue, not a broken feature.
+        console.error("Could not delete old Cloudinary image:", error);
+    }
+
+}
+
+
+if (saveReviewImageButton) {
+
+    saveReviewImageButton.addEventListener("click", async () => {
+
+        if (!selectedReviewImageFile) {
+            return;
+        }
+
+        saveReviewImageButton.disabled = true;
+
+        if (reviewImageStatus) {
+            reviewImageStatus.textContent = "Uploading...";
+        }
+
+        try {
+
+            const formData = new FormData();
+            formData.append("image", selectedReviewImageFile);
+
+            const uploadResponse = await adminFetch(
+                "/api/admin/images",
+                { method: "POST", body: formData }
+            );
+
+            const uploadResult = await uploadResponse.json();
+
+            if (!uploadResponse.ok || !uploadResult.success) {
+                throw new Error(uploadResult.message || "Upload failed.");
+            }
+
+            const previousPublicId = currentReviewImagePublicId;
+
+            await updateSiteSettings({
+                reviewFormImageUrl: uploadResult.image.url,
+                reviewFormImagePublicId: uploadResult.image.publicId
+            });
+
+            // Clean up the image being replaced, now that the new one
+            // is confirmed saved.
+            if (previousPublicId) {
+                await deleteCloudinaryImage(previousPublicId);
+            }
+
+            currentReviewImageUrl = uploadResult.image.url;
+            currentReviewImagePublicId = uploadResult.image.publicId;
+
+            if (reviewImageStatus) {
+                reviewImageStatus.textContent = "Image saved.";
+            }
+
+            if (deleteReviewImageButton) {
+                deleteReviewImageButton.style.display = "inline-block";
+            }
+
+            selectedReviewImageFile = null;
+            reviewImageFileInput.value = "";
+
+        } catch (error) {
+
+            console.error("Review image save error:", error);
+
+            if (reviewImageStatus) {
+                reviewImageStatus.textContent =
+                    error.message || "Unable to save image.";
+            }
+
+        } finally {
+
+            saveReviewImageButton.disabled = true;
+        }
+
+    });
+
+}
+
+
+if (deleteReviewImageButton) {
+
+    deleteReviewImageButton.addEventListener("click", async () => {
+
+        const confirmed = confirm(
+            "Remove this image from the review form and delete it from Cloudinary? This can't be undone."
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        deleteReviewImageButton.disabled = true;
+
+        if (reviewImageStatus) {
+            reviewImageStatus.textContent = "Removing...";
+        }
+
+        try {
+
+            await updateSiteSettings({
+                reviewFormImageUrl: "",
+                reviewFormImagePublicId: ""
+            });
+
+            if (currentReviewImagePublicId) {
+                await deleteCloudinaryImage(currentReviewImagePublicId);
+            }
+
+            currentReviewImageUrl = "";
+            currentReviewImagePublicId = "";
+
+            if (reviewImagePreview) {
+                reviewImagePreview.src = "";
+                reviewImagePreview.style.display = "none";
+            }
+
+            deleteReviewImageButton.style.display = "none";
+
+            if (reviewImageStatus) {
+                reviewImageStatus.textContent = "Image removed.";
+            }
+
+        } catch (error) {
+
+            console.error("Review image delete error:", error);
+
+            if (reviewImageStatus) {
+                reviewImageStatus.textContent =
+                    error.message || "Unable to remove image.";
+            }
+
+        } finally {
+
+            deleteReviewImageButton.disabled = false;
         }
 
     });

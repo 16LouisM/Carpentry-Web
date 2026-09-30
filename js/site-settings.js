@@ -213,6 +213,26 @@ async function applySiteSettings() {
             }
         }
 
+
+        // --------------------------------------
+        // REVIEW FORM IMAGE
+        // --------------------------------------
+        //
+        // Optional — stays hidden if nothing has been uploaded yet.
+
+        if (settings.reviewFormImageUrl) {
+
+            const wrapper = document.getElementById("reviewImageWrapper");
+            const img = document.getElementById("reviewFormImage");
+
+            if (wrapper && img) {
+
+                img.src = settings.reviewFormImageUrl;
+                img.alt = settings.reviewFormImageAlt || "";
+                wrapper.style.display = "block";
+            }
+        }
+
     } catch (error) {
 
         console.error("Could not load site settings:", error);

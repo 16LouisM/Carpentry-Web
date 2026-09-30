@@ -53,6 +53,42 @@
             color: var(--text-mid);
             margin-top: 0.5rem;
         }
+
+        .review-section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+            margin-top: 3rem;
+        }
+
+        #reviewFormSection .form-group input,
+        #reviewFormSection .form-group select,
+        #reviewFormSection .form-group textarea {
+            padding: 0.55rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        #reviewFormSection .form-group textarea {
+            min-height: 80px;
+        }
+
+        #reviewImageWrapper {
+            align-self: stretch;
+            min-height: 300px;
+            border-radius: var(--radius-lg, 12px);
+            overflow: hidden;
+        }
+
+        @media (max-width: 800px) {
+            .review-section-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #reviewImageWrapper {
+                min-height: 200px;
+            }
+        }
     </style>
 </head>
 
@@ -743,114 +779,122 @@
             <!-- =====================================================
                  LEAVE A REVIEW
             ====================================================== -->
-            <div class="review-form-section" id="reviewFormSection" style="margin-top:3rem; max-width:600px;">
+            <div class="review-section-grid" id="reviewSectionGrid">
 
-                <h3>
-                    Share Your Experience
-                </h3>
+                <div class="review-form-section" id="reviewFormSection">
 
-                <form id="reviewForm" novalidate>
+                    <h3>
+                        Share Your Experience
+                    </h3>
 
-                    <!-- Honeypot — invisible to real visitors, catches bots -->
-                    <input type="text" id="reviewHoneypot" name="companyWebsite" autocomplete="off" tabindex="-1"
-                        style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;">
+                    <form id="reviewForm" novalidate>
 
-                    <div class="form-group">
+                        <!-- Honeypot — invisible to real visitors, catches bots -->
+                        <input type="text" id="reviewHoneypot" name="companyWebsite" autocomplete="off" tabindex="-1"
+                            style="position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;">
 
-                        <label for="reviewerName">
-                            Your Name *
-                        </label>
+                        <div class="form-group">
 
-                        <input type="text" id="reviewerName" name="reviewerName" required>
+                            <label for="reviewerName">
+                                Your Name *
+                            </label>
 
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="reviewerRole">
-                            What best describes you?
-                        </label>
-
-                        <select id="reviewerRole" name="reviewerRole">
-                            <option value="">— Select an option —</option>
-                            <option value="Homeowner">Homeowner</option>
-                            <option value="Business Owner">Business Owner</option>
-                            <option value="Interior Designer">Interior Designer</option>
-                            <option value="Architect">Architect</option>
-                            <option value="Property Developer">Property Developer</option>
-                            <option value="Contractor / Builder">Contractor / Builder</option>
-                            <option value="Landlord / Property Owner">Landlord / Property Owner</option>
-                            <option value="Estate Agent">Estate Agent</option>
-                            <option value="Hotel / Lodge / Hospitality">Hotel / Lodge / Hospitality</option>
-                            <option value="Office / Corporate">Office / Corporate</option>
-                            <option value="Other">Other</option>
-                        </select>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="reviewerLocation">
-                            Your Location (optional)
-                        </label>
-
-                        <input type="text" id="reviewerLocation" name="reviewerLocation"
-                            placeholder="e.g. Soshanguve, Gauteng">
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label>
-                            Your Rating *
-                        </label>
-
-                        <div id="starRatingInput" role="radiogroup" aria-label="Star rating" class="star-rating-input">
-
-                            <button type="button" class="star-btn" data-value="1" aria-label="1 star"><i
-                                    data-lucide="star"></i></button>
-
-                            <button type="button" class="star-btn" data-value="2" aria-label="2 stars"><i
-                                    data-lucide="star"></i></button>
-
-                            <button type="button" class="star-btn" data-value="3" aria-label="3 stars"><i
-                                    data-lucide="star"></i></button>
-
-                            <button type="button" class="star-btn" data-value="4" aria-label="4 stars"><i
-                                    data-lucide="star"></i></button>
-
-                            <button type="button" class="star-btn" data-value="5" aria-label="5 stars"><i
-                                    data-lucide="star"></i></button>
+                            <input type="text" id="reviewerName" name="reviewerName" required>
 
                         </div>
 
-                        <input type="hidden" id="reviewRating" name="reviewRating" value="">
+                        <div class="form-group">
 
+                            <label for="reviewerRole">
+                                What best describes you?
+                            </label>
+
+                            <select id="reviewerRole" name="reviewerRole">
+                                <option value="">— Select an option —</option>
+                                <option value="Homeowner">Homeowner</option>
+                                <option value="Business Owner">Business Owner</option>
+                                <option value="Interior Designer">Interior Designer</option>
+                                <option value="Architect">Architect</option>
+                                <option value="Property Developer">Property Developer</option>
+                                <option value="Contractor / Builder">Contractor / Builder</option>
+                                <option value="Landlord / Property Owner">Landlord / Property Owner</option>
+                                <option value="Estate Agent">Estate Agent</option>
+                                <option value="Hotel / Lodge / Hospitality">Hotel / Lodge / Hospitality</option>
+                                <option value="Office / Corporate">Office / Corporate</option>
+                                <option value="Other">Other</option>
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="reviewerLocation">
+                                Your Location (optional)
+                            </label>
+
+                            <input type="text" id="reviewerLocation" name="reviewerLocation"
+                                placeholder="e.g. Soshanguve, Gauteng">
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>
+                                Your Rating *
+                            </label>
+
+                            <div id="starRatingInput" role="radiogroup" aria-label="Star rating" class="star-rating-input">
+
+                                <button type="button" class="star-btn" data-value="1" aria-label="1 star"><i
+                                        data-lucide="star"></i></button>
+
+                                <button type="button" class="star-btn" data-value="2" aria-label="2 stars"><i
+                                        data-lucide="star"></i></button>
+
+                                <button type="button" class="star-btn" data-value="3" aria-label="3 stars"><i
+                                        data-lucide="star"></i></button>
+
+                                <button type="button" class="star-btn" data-value="4" aria-label="4 stars"><i
+                                        data-lucide="star"></i></button>
+
+                                <button type="button" class="star-btn" data-value="5" aria-label="5 stars"><i
+                                        data-lucide="star"></i></button>
+
+                            </div>
+
+                            <input type="hidden" id="reviewRating" name="reviewRating" value="">
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="reviewText">
+                                Your Review *
+                            </label>
+
+                            <textarea id="reviewText" name="reviewText" rows="4" required></textarea>
+
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="reviewSubmitBtn">
+                            Submit Review
+                        </button>
+
+                        <p id="reviewFormMessage" aria-live="polite" style="margin-top:0.5rem; color:#a33;"></p>
+
+                    </form>
+
+                    <div class="review-form-success" id="reviewFormSuccess" style="display:none;">
+                        <p>
+                            Thank you for your review! It will appear on our
+                            site once approved.
+                        </p>
                     </div>
 
-                    <div class="form-group">
+                </div>
 
-                        <label for="reviewText">
-                            Your Review *
-                        </label>
-
-                        <textarea id="reviewText" name="reviewText" rows="4" required></textarea>
-
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" id="reviewSubmitBtn">
-                        Submit Review
-                    </button>
-
-                    <p id="reviewFormMessage" aria-live="polite" style="margin-top:0.5rem; color:#a33;"></p>
-
-                </form>
-
-                <div class="review-form-success" id="reviewFormSuccess" style="display:none;">
-                    <p>
-                        Thank you for your review! It will appear on our
-                        site once approved.
-                    </p>
+                <div id="reviewImageWrapper" style="display:none;">
+                    <img id="reviewFormImage" src="" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:var(--radius-lg, 12px); display:block;">
                 </div>
 
             </div>
