@@ -109,3 +109,87 @@
         .star-btn.filled svg {
             fill: currentColor;
         }
+
+        /* =========================================
+           TESTIMONIALS MARQUEE
+           Continuous right-to-left auto-scroll, pauses on hover.
+           ========================================= */
+
+        .testimonials-marquee {
+            overflow: hidden;
+            width: 100%;
+            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        }
+
+        .testimonials-marquee .testimonials-grid {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 1.4rem;
+            width: max-content;
+            animation: testimonials-scroll 32s linear infinite;
+        }
+
+        .testimonials-marquee:hover .testimonials-grid {
+            animation-play-state: paused;
+        }
+
+        .testimonials-marquee .testimonial-card {
+            flex: 0 0 340px;
+            width: 340px;
+        }
+
+        @keyframes testimonials-scroll {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .testimonials-marquee .testimonials-grid {
+                animation: none;
+            }
+        }
+
+        /* =========================================
+           REVIEW FORM SECTION (side-by-side with image)
+           ========================================= */
+
+        .review-section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+            margin-top: 3rem;
+        }
+
+        #reviewFormSection .form-group input,
+        #reviewFormSection .form-group select,
+        #reviewFormSection .form-group textarea {
+            padding: 0.55rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        #reviewFormSection .form-group textarea {
+            min-height: 80px;
+        }
+
+        #reviewImageWrapper {
+            align-self: stretch;
+            min-height: 300px;
+            border-radius: var(--radius-lg, 12px);
+            overflow: hidden;
+        }
+
+        @media (max-width: 800px) {
+            .review-section-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #reviewImageWrapper {
+                min-height: 200px;
+            }
+        }

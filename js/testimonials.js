@@ -2,7 +2,10 @@
 
 import { getApprovedTestimonials } from "./firebase-firestore.js";
 
-document.addEventListener("DOMContentLoaded", loadApprovedTestimonials);
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadApprovedTestimonials();
+    duplicateForMarquee();
+});
 
 
 async function loadApprovedTestimonials() {
@@ -32,6 +35,34 @@ async function loadApprovedTestimonials() {
     } catch (error) {
 
         console.error("Could not load testimonials from Firestore:", error);
+    }
+
+}
+
+
+// ==========================================
+// MARQUEE DUPLICATION
+// ==========================================
+//
+// The scrolling animation (css) moves the track left by exactly 50% of
+// its own width, then jumps back to 0 — invisible to the eye only if
+// the track holds two identical copies of the cards back-to-back.
+// Runs once, after the Firestore load attempt above has either
+// replaced the cards or left the static ones in place, so it always
+// doubles whatever actually ended up in the grid.
+
+function duplicateForMarquee() {
+
+    const grid = document.querySelector("#testimonials .testimonials-grid");
+
+    if (!grid || !grid.children.length) {
+        return;
+    }
+
+    grid.innerHTML += grid.innerHTML;
+
+    if (typeof lucide !== "undefined") {
+        lucide.createIcons();
     }
 
 }
