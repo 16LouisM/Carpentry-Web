@@ -283,54 +283,38 @@
                      WHO WE ARE
                 ================================================= -->
 
-                <div class="settings-block" style="margin-top:2rem;">
-
-                    <h3>Who We Are Section</h3>
-
-                    <p>
-                        Controls the "Who We Are" text and photo on
-                        your homepage.
-                    </p>
+                <!-- WHO WE ARE -->
+                <div class="settings-form">
+                    <h3>Who We Are</h3>
+                    <p>Update the text and image used in the Who We Are section.</p>
 
                     <div class="form-group">
-
-                        <label for="aboutTitleInput">
-                            Heading
-                        </label>
-
-                        <input type="text" id="aboutTitleInput" placeholder="A Family Tradition of Fine Woodworking">
-
+                        <label for="aboutTitleInput">Title</label>
+                        <input type="text" id="aboutTitleInput" placeholder="Who We Are">
                     </div>
 
                     <div class="form-group">
-
-                        <label for="aboutTextArea">
-                            Body text (leave a blank line between
-                            paragraphs)
-                        </label>
-
-                        <textarea id="aboutTextArea" rows="8"
-                            placeholder="Write each paragraph, leaving a blank line between them."></textarea>
-
+                        <label for="aboutTextArea">Description</label>
+                        <textarea id="aboutTextArea" rows="5"
+                            placeholder="Tell visitors about your business..."></textarea>
                     </div>
 
-                    <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; margin-top:1rem;">
+                    <div class="form-group">
+                        <label for="aboutImageFileInput">Who We Are Image</label>
 
-                        <img id="aboutImagePreview" src="" alt="Current Who We Are photo"
-                            style="width:110px; height:80px; object-fit:cover; background:#f4f1ec; border:1px solid #ddd; border-radius:8px;">
+                        <input type="file" id="aboutImageFileInput" accept="image/*">
 
-                        <label for="aboutImageFileInput">Choose a Who We Are photo</label>
-
-                        <input type="file" id="aboutImageFileInput" accept="image/jpeg,image/png,image/webp">
-
+                        <div class="image-preview-container">
+                            <img id="aboutImagePreview" src="" alt="Who We Are preview"
+                                style="display:none; max-width:300px; max-height:200px; object-fit:cover; border-radius:8px;">
+                        </div>
                     </div>
 
-                    <button type="button" id="saveAboutButton" class="btn btn-primary" style="margin-top:1rem;">
-                        Save Who We Are Section
+                    <button type="button" id="saveAboutButton" class="primary-button">
+                        Save Who We Are
                     </button>
 
-                    <p id="aboutStatus" style="margin-top:0.5rem; font-size:0.9rem; color:#777;"></p>
-
+                    <p id="aboutStatus" class="settings-status"></p>
                 </div>
 
 
@@ -385,12 +369,7 @@
 
                     <h3>Workshop Photo</h3>
 
-                    <p>
-                        This photo appears next to your contact form, replacing the
-                        "Workshop Photo Coming Soon" placeholder once you set one.
-                    </p>
-
-                    <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; flex-wrap:wrap;">
 
                         <img id="workshopPhotoPreview" src="" alt="Current workshop photo"
                             style="width:110px; height:80px; object-fit:cover; background:#f4f1ec; border:1px solid #ddd; border-radius:8px; display:none;">
