@@ -2,7 +2,13 @@
 
 import { loginAdmin, logoutAdmin } from "./firebase-auth.js";
 import { isAdmin } from "../../js/firebase-firestore.js";
+import { notify } from "./admin-notify.js";
+import { replaceNavigate } from "./history-guard.js";
 
+
+// ==========================================
+// DOM ELEMENTS
+// ==========================================
 
 const form = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
@@ -28,6 +34,17 @@ const sessionCleared = logoutAdmin().catch((error) => {
 // ==========================================
 // MESSAGES
 // ==========================================
+//
+// Two parallel channels:
+//
+//   1. showMessage()  — the inline text under the form. Stays put,
+//                       does not auto-dismiss, ties the error to the
+//                       form itself.
+//   2. notify.*       — the centered toast. Momentary, harder to miss,
+//                       consistent with the rest of the admin.
+//
+// Both are used together so the user sees the message wherever their
+// eyes happen to be.
 
 function showMessage(text, isError = true) {
 
@@ -102,7 +119,13 @@ if (!form) {
         const password = passwordInput.value;
 
         if (!email || !password) {
-            showMessage("Please enter your email and password.");
+
+            const message = "Please enter your email and password.";
+
+            showMessage(message);
+
+            notify.warning(message, { title: "Missing details" });
+
             return;
         }
 
@@ -121,22 +144,39 @@ if (!form) {
 
                 await logoutAdmin();
 
-                showMessage("This account does not have admin access.");
+                const message = "This account does not have admin access.";
+
+                showMessage(message);
+
+                notify.error(message, { title: "Access denied" });
 
                 setBusy(false);
 
                 return;
             }
 
-            window.location.replace("./dashboard.html");
+            // Replace, not assign — this overwrites the login entry
+            // in the browser's history stack so Back from the
+            // dashboard cannot land here. The dashboard's own
+            // history guard takes over on the next page.
+            replaceNavigate("./dashboard.html");
 
         } catch (error) {
 
             console.error("Login error:", error);
 
-            showMessage(messageForError(error));
+            const message = messageForError(error);
+
+            showMessage(message);
+
+            notify.error(message, { title: "Sign-in failed" });
 
             setBusy(false);
+
+            if (passwordInput) {
+                passwordInput.value = "";
+                passwordInput.focus();
+            }
         }
 
     });

@@ -21,6 +21,10 @@ import {
 import { protectAdminPage } from "./admin-guard.js";
 import { adminFetch } from "./admin-fetch.js";
 import { notify } from "./admin-notify.js";
+import {
+    installHistoryGuard,
+    uninstallHistoryGuard
+} from "./history-guard.js";
 
 
 // ==========================================
@@ -85,6 +89,44 @@ let signingOut = false;
 
 
 // ==========================================
+// HISTORY GUARD
+// ==========================================
+//
+// Trap Back/Forward so the user cannot cross between the admin and
+// the public site using browser chrome. Installed synchronously,
+// before any async work runs, so the wall is up from the first
+// paint. The callback fires on every attempted exit — if the
+// session has since been lost we bounce to login; otherwise we
+// silently hold position.
+
+installHistoryGuard({
+    onExitAttempt: async () => {
+
+        if (signingOut) {
+            return;
+        }
+
+        try {
+
+            const user = await protectAdminPage();
+
+            if (!user) {
+                uninstallHistoryGuard();
+                window.location.replace("./index.html");
+            }
+
+        } catch (error) {
+
+            console.error("History guard auth check failed:", error);
+
+            uninstallHistoryGuard();
+            window.location.replace("./index.html");
+        }
+    }
+});
+
+
+// ==========================================
 // LOGOUT
 // ==========================================
 
@@ -108,6 +150,10 @@ if (!logoutButton) {
         try {
 
             await logoutAdmin();
+
+            // Drop the guard so our own redirect is not swallowed by
+            // the popstate trap.
+            uninstallHistoryGuard();
 
             window.location.replace("./index.html");
 
@@ -141,6 +187,11 @@ watchAuthState((user) => {
     }
 
     if (!user) {
+
+        // Session revoked elsewhere or expired — kill the guard so
+        // this redirect is not blocked by our own trap.
+        uninstallHistoryGuard();
+
         window.location.replace("./index.html");
         return;
     }
