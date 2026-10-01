@@ -20,6 +20,7 @@ import {
 
 import { protectAdminPage } from "./admin-guard.js";
 import { adminFetch } from "./admin-fetch.js";
+import { notify } from "./admin-notify.js";
 
 
 // ==========================================
@@ -56,6 +57,12 @@ const workshopPhotoFileInput = document.getElementById("workshopPhotoFileInput")
 const workshopPhotoPreview = document.getElementById("workshopPhotoPreview");
 const saveWorkshopPhotoButton = document.getElementById("saveWorkshopPhotoButton");
 const workshopPhotoStatus = document.getElementById("workshopPhotoStatus");
+
+const reviewImageFileInput = document.getElementById("reviewImageFileInput");
+const reviewImagePreview = document.getElementById("reviewImagePreview");
+const saveReviewImageButton = document.getElementById("saveReviewImageButton");
+const deleteReviewImageButton = document.getElementById("deleteReviewImageButton");
+const reviewImageStatus = document.getElementById("reviewImageStatus");
 
 const addProjectButton = document.getElementById("addProjectButton");
 const projectFormWrapper = document.getElementById("projectFormWrapper");
@@ -108,7 +115,9 @@ if (!logoutButton) {
 
             console.error("Logout error:", error);
 
-            alert("Unable to sign out. Please try again.");
+            notify.error("Unable to sign out. Please try again.", {
+                title: "Sign-out failed"
+            });
 
             signingOut = false;
 
@@ -455,6 +464,10 @@ if (saveProjectButton) {
                 projectFormStatus.textContent = "Please enter a project title.";
             }
 
+            notify.warning("Please enter a project title.", {
+                title: "Missing title"
+            });
+
             return;
         }
 
@@ -496,13 +509,20 @@ if (saveProjectButton) {
                 imageUrl
             };
 
-            if (editingProjectId) {
+            const wasEditing = Boolean(editingProjectId);
+
+            if (wasEditing) {
                 await updateProject(editingProjectId, fields);
             } else {
                 await createProject(fields);
             }
 
             closeProjectForm();
+
+            notify.success(
+                wasEditing ? "Project updated." : "Project added.",
+                { title: "Projects" }
+            );
 
             await loadDashboardData();
 
@@ -514,6 +534,10 @@ if (saveProjectButton) {
                 projectFormStatus.textContent =
                     error.message || "Unable to save this project.";
             }
+
+            notify.error(error.message || "Unable to save this project.", {
+                title: "Save failed"
+            });
 
         } finally {
 
@@ -554,6 +578,11 @@ if (saveProjectButton) {
 
             if (project) {
                 openProjectForm(project);
+            } else {
+                notify.warning(
+                    "This project is no longer in the list. Refresh and try again.",
+                    { title: "Project not found" }
+                );
             }
 
             return;
@@ -561,8 +590,13 @@ if (saveProjectButton) {
 
         if (action === "delete") {
 
-            const confirmed = confirm(
-                "Delete this project permanently? This does not delete its photo from Cloudinary."
+            const confirmed = await notify.confirm(
+                "Delete this project permanently? This does not delete its photo from Cloudinary.",
+                {
+                    title: "Delete project",
+                    confirmLabel: "Delete",
+                    variant: "danger"
+                }
             );
 
             if (!confirmed) {
@@ -576,11 +610,17 @@ if (saveProjectButton) {
                 await deleteProject(id);
                 await loadDashboardData();
 
+                notify.success("Project deleted.", {
+                    title: "Projects"
+                });
+
             } catch (error) {
 
                 console.error("Project delete error:", error);
 
-                alert("The project could not be deleted.");
+                notify.error("The project could not be deleted.", {
+                    title: "Delete failed"
+                });
 
                 button.disabled = false;
             }
@@ -797,20 +837,30 @@ function attachTestimonialActions() {
 
             if (action === "approve") {
                 await updateTestimonialStatus(id, "approved");
+                notify.success("Review approved.", { title: "Testimonials" });
             }
 
             if (action === "reject") {
                 await updateTestimonialStatus(id, "rejected");
+                notify.info("Review rejected.", { title: "Testimonials" });
             }
 
             if (action === "remove") {
                 await updateTestimonialStatus(id, "removed");
+                notify.warning("Review removed from the site.", {
+                    title: "Testimonials"
+                });
             }
 
             if (action === "delete") {
 
-                const confirmed = confirm(
-                    "Delete this testimonial permanently?"
+                const confirmed = await notify.confirm(
+                    "Delete this testimonial permanently?",
+                    {
+                        title: "Delete testimonial",
+                        confirmLabel: "Delete",
+                        variant: "danger"
+                    }
                 );
 
                 if (!confirmed) {
@@ -819,6 +869,9 @@ function attachTestimonialActions() {
                 }
 
                 await deleteTestimonial(id);
+                notify.success("Testimonial deleted.", {
+                    title: "Testimonials"
+                });
             }
 
             await loadTestimonials();
@@ -828,7 +881,9 @@ function attachTestimonialActions() {
 
             console.error("Testimonial action error:", error);
 
-            alert("The action could not be completed.");
+            notify.error("The action could not be completed.", {
+                title: "Action failed"
+            });
 
             button.disabled = false;
         }
@@ -875,6 +930,11 @@ async function initSettingsPanel() {
     } catch (error) {
 
         console.error("Could not load current site settings:", error);
+
+        notify.error("Could not load current site settings.", {
+            title: "Settings"
+        });
+
         return;
     }
 
@@ -897,6 +957,7 @@ async function initSettingsPanel() {
 
         if (aboutImagePreview) {
             aboutImagePreview.src = settings.aboutImageUrl;
+            aboutImagePreview.style.display = "block";
         }
     }
 
@@ -1004,6 +1065,8 @@ if (saveLogoButton) {
                 logoStatus.textContent = "Logo saved.";
             }
 
+            notify.success("Logo saved.", { title: "Settings" });
+
             selectedLogoFile = null;
             logoFileInput.value = "";
 
@@ -1014,6 +1077,10 @@ if (saveLogoButton) {
             if (logoStatus) {
                 logoStatus.textContent = error.message || "Unable to save logo.";
             }
+
+            notify.error(error.message || "Unable to save logo.", {
+                title: "Save failed"
+            });
 
         } finally {
 
@@ -1035,6 +1102,7 @@ if (aboutImageFileInput) {
 
         if (file && aboutImagePreview) {
             aboutImagePreview.src = URL.createObjectURL(file);
+            aboutImagePreview.style.display = "block";
         }
 
         if (aboutStatus) {
@@ -1098,6 +1166,8 @@ if (saveAboutButton) {
                 aboutStatus.textContent = "Who We Are section saved.";
             }
 
+            notify.success("Who We Are section saved.", { title: "Settings" });
+
         } catch (error) {
 
             console.error("Who We Are save error:", error);
@@ -1106,6 +1176,10 @@ if (saveAboutButton) {
                 aboutStatus.textContent =
                     error.message || "Unable to save this section.";
             }
+
+            notify.error(error.message || "Unable to save this section.", {
+                title: "Save failed"
+            });
 
         } finally {
 
@@ -1151,6 +1225,8 @@ if (saveContactButton) {
                 contactStatus.textContent = "Contact details saved.";
             }
 
+            notify.success("Contact details saved.", { title: "Settings" });
+
         } catch (error) {
 
             console.error("Contact details save error:", error);
@@ -1159,6 +1235,10 @@ if (saveContactButton) {
                 contactStatus.textContent =
                     error.message || "Unable to save contact details.";
             }
+
+            notify.error(error.message || "Unable to save contact details.", {
+                title: "Save failed"
+            });
 
         } finally {
 
@@ -1240,6 +1320,8 @@ if (saveWorkshopPhotoButton) {
                 workshopPhotoStatus.textContent = "Workshop photo saved.";
             }
 
+            notify.success("Workshop photo saved.", { title: "Settings" });
+
             selectedWorkshopPhotoFile = null;
             workshopPhotoFileInput.value = "";
 
@@ -1251,6 +1333,10 @@ if (saveWorkshopPhotoButton) {
                 workshopPhotoStatus.textContent =
                     error.message || "Unable to save this photo.";
             }
+
+            notify.error(error.message || "Unable to save this photo.", {
+                title: "Save failed"
+            });
 
         } finally {
 
@@ -1372,6 +1458,8 @@ if (saveReviewImageButton) {
                 reviewImageStatus.textContent = "Image saved.";
             }
 
+            notify.success("Image saved.", { title: "Review form" });
+
             if (deleteReviewImageButton) {
                 deleteReviewImageButton.style.display = "inline-block";
             }
@@ -1388,6 +1476,10 @@ if (saveReviewImageButton) {
                     error.message || "Unable to save image.";
             }
 
+            notify.error(error.message || "Unable to save image.", {
+                title: "Save failed"
+            });
+
         } finally {
 
             saveReviewImageButton.disabled = true;
@@ -1402,8 +1494,13 @@ if (deleteReviewImageButton) {
 
     deleteReviewImageButton.addEventListener("click", async () => {
 
-        const confirmed = confirm(
-            "Remove this image from the review form and delete it from Cloudinary? This can't be undone."
+        const confirmed = await notify.confirm(
+            "Remove this image from the review form and delete it from Cloudinary? This can't be undone.",
+            {
+                title: "Remove review image",
+                confirmLabel: "Remove",
+                variant: "danger"
+            }
         );
 
         if (!confirmed) {
@@ -1441,6 +1538,8 @@ if (deleteReviewImageButton) {
                 reviewImageStatus.textContent = "Image removed.";
             }
 
+            notify.success("Image removed.", { title: "Review form" });
+
         } catch (error) {
 
             console.error("Review image delete error:", error);
@@ -1449,6 +1548,10 @@ if (deleteReviewImageButton) {
                 reviewImageStatus.textContent =
                     error.message || "Unable to remove image.";
             }
+
+            notify.error(error.message || "Unable to remove image.", {
+                title: "Remove failed"
+            });
 
         } finally {
 
