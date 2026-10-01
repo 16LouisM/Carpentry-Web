@@ -5,7 +5,6 @@ import {
     createProject,
     updateProject,
     deleteProject,
-    getServices,
     getAllTestimonials,
     updateTestimonialStatus,
     deleteTestimonial,
@@ -228,7 +227,6 @@ navItems.forEach((button) => {
         const titles = {
             overview: "Dashboard",
             projects: "Projects",
-            services: "Services",
             testimonials: "Testimonials",
             settings: "Settings"
         };
@@ -251,27 +249,21 @@ navItems.forEach((button) => {
 async function loadDashboardData() {
 
     // Each collection is fetched independently: a broken query on one
-    // (e.g. a missing Firestore index) must never prevent the other
-    // two from loading and rendering. Promise.all() would fail the
+    // (e.g. a missing Firestore index) must never prevent the others
+    // from loading and rendering. Promise.all() would fail the
     // whole batch if any single promise rejected — Promise.allSettled
     // does not.
 
     const [
         projectsResult,
-        servicesResult,
         testimonialsResult
     ] = await Promise.allSettled([
         getProjects(),
-        getServices(),
         getAllTestimonials()
     ]);
 
     const projects = projectsResult.status === "fulfilled"
         ? projectsResult.value
-        : [];
-
-    const services = servicesResult.status === "fulfilled"
-        ? servicesResult.value
         : [];
 
     const testimonials = testimonialsResult.status === "fulfilled"
@@ -282,19 +274,12 @@ async function loadDashboardData() {
         console.error("Could not load projects:", projectsResult.reason);
     }
 
-    if (servicesResult.status === "rejected") {
-        console.error("Could not load services:", servicesResult.reason);
-    }
-
     if (testimonialsResult.status === "rejected") {
         console.error("Could not load testimonials:", testimonialsResult.reason);
     }
 
     document.getElementById("projectCount").textContent =
         projectsResult.status === "fulfilled" ? projects.length : "—";
-
-    document.getElementById("serviceCount").textContent =
-        servicesResult.status === "fulfilled" ? services.length : "—";
 
     document.getElementById("pendingCount").textContent =
         testimonialsResult.status === "fulfilled"
@@ -306,11 +291,10 @@ async function loadDashboardData() {
             ? testimonials.filter((item) => item.status === "approved").length
             : "—";
 
-    // Projects renders even if Services or Testimonials failed — this is
-    // the fix for the "Edit form opens empty" bug: projectsCache now
-    // gets populated as long as getProjects() itself succeeds.
+    // Projects renders even if Testimonials failed — this is the fix
+    // for the "Edit form opens empty" bug: projectsCache now gets
+    // populated as long as getProjects() itself succeeds.
     displayProjects(projects);
-    displayServices(services);
 
 }
 
@@ -681,51 +665,6 @@ if (saveProjectButton) {
     });
 
 })();
-
-
-// ==========================================
-// SERVICES
-// ==========================================
-
-function displayServices(services) {
-
-    const container = document.getElementById("servicesList");
-
-    if (!container) {
-        return;
-    }
-
-    if (!services.length) {
-
-        container.innerHTML = `
-            <div class="empty-state">
-                No services have been added yet.
-            </div>
-        `;
-
-        return;
-    }
-
-    container.innerHTML = services.map((service) => `
-
-        <div class="admin-item">
-
-            <div>
-                <h3>${escapeHTML(service.title || "Untitled")}</h3>
-                <p>${escapeHTML(service.description || "")}</p>
-            </div>
-
-            <span class="status ${
-                service.active ? "status-approved" : "status-rejected"
-            }">
-                ${service.active ? "Active" : "Inactive"}
-            </span>
-
-        </div>
-
-    `).join("");
-
-}
 
 
 // ==========================================
