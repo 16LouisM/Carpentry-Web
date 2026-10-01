@@ -2,11 +2,18 @@
 
 import { getApprovedTestimonials } from "./firebase-firestore.js";
 
+
 document.addEventListener("DOMContentLoaded", async () => {
+
     await loadApprovedTestimonials();
     duplicateForMarquee();
+
 });
 
+
+// ==========================================
+// LOAD TESTIMONIALS
+// ==========================================
 
 async function loadApprovedTestimonials() {
 
@@ -44,12 +51,27 @@ async function loadApprovedTestimonials() {
 // MARQUEE DUPLICATION
 // ==========================================
 //
-// The scrolling animation (css) moves the track left by exactly 50% of
-// its own width, then jumps back to 0 — invisible to the eye only if
-// the track holds two identical copies of the cards back-to-back.
-// Runs once, after the Firestore load attempt above has either
-// replaced the cards or left the static ones in place, so it always
-// doubles whatever actually ended up in the grid.
+// The scrolling animation moves the track left by exactly 50% of its
+// own width, then jumps back to 0 — invisible to the eye only if the
+// track holds two identical copies of the cards back-to-back.
+//
+// Two things matter here:
+//
+//   1. We CLONE the existing nodes and append the clones, rather than
+//      doing `grid.innerHTML += grid.innerHTML`. The innerHTML trick
+//      works, but it re-parses every node from scratch — which
+//      strips the <svg> that Lucide already generated, drops any
+//      event listeners, and can flash unstyled content mid-parse.
+//      cloneNode(true) preserves the rendered DOM exactly.
+//
+//   2. The duplicates are marked `aria-hidden` and stripped of
+//      focusability, so screen readers and keyboard tab order only
+//      encounter each testimonial once. Without this, every card
+//      would be announced (and tabbed to) twice.
+//
+// Runs once, after the Firestore load has either replaced the cards
+// or left the static ones in place, so it always doubles whatever
+// actually ended up in the grid.
 
 function duplicateForMarquee() {
 
@@ -59,14 +81,38 @@ function duplicateForMarquee() {
         return;
     }
 
-    grid.innerHTML += grid.innerHTML;
-
-    if (typeof lucide !== "undefined") {
-        lucide.createIcons();
+    // Guard against a second run (e.g. if this is ever called again
+    // from another code path). Duplicating twice would give four
+    // copies, and the animation would visibly speed up.
+    if (grid.dataset.marqueeDuplicated === "true") {
+        return;
     }
+
+    const originals = Array.from(grid.children);
+
+    originals.forEach((node) => {
+
+        const clone = node.cloneNode(true);
+
+        // Screen readers should not encounter the duplicate set.
+        clone.setAttribute("aria-hidden", "true");
+
+        // Remove the clones from the keyboard tab order as well.
+        clone
+            .querySelectorAll("a, button, input, select, textarea, [tabindex]")
+            .forEach((el) => el.setAttribute("tabindex", "-1"));
+
+        grid.appendChild(clone);
+    });
+
+    grid.dataset.marqueeDuplicated = "true";
 
 }
 
+
+// ==========================================
+// CARD TEMPLATE
+// ==========================================
 
 function testimonialCardHTML(testimonial) {
 
@@ -118,6 +164,10 @@ function testimonialCardHTML(testimonial) {
     `;
 }
 
+
+// ==========================================
+// HELPERS
+// ==========================================
 
 function getInitials(name) {
 

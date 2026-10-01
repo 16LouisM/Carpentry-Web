@@ -301,22 +301,15 @@
 
 .joint-divider {
     width: 100%;
-
+    height: 24px;
     line-height: 0;
-
-    background: var(--paper);
+    pointer-events: none;
 }
 
 .joint-divider svg {
-    width: 100%;
-
-    height: 22px;
-
     display: block;
-}
-
-.joint-divider svg path {
-    fill: var(--charcoal);
+    width: 100%;
+    height: 100%;
 }
 
 /* =========================================================
