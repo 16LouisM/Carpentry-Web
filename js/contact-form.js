@@ -1,3 +1,5 @@
+// js/contact-form.js
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const form = document.getElementById("formFields");
@@ -51,7 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
 
-            const response = await fetch("http://localhost:5000/api/contact", {
+            // Resolved at runtime — see getApiBase() below.
+            const response = await fetch(`${getApiBase()}/api/contact`, {
                 method: "POST",
 
                 headers: {
@@ -72,8 +75,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // -----------------------------------------
             // HIDDEN ADMIN TRIGGER
             // -----------------------------------------
+            // Replace, don't assign, so Back can't return the visitor
+            // to the public contact page they just triggered the admin
+            // redirect from.
             if (result.adminRedirect === true) {
-                window.location.href = result.redirect || "/admin/index.html";
+                window.location.replace(
+                    result.redirect || "/admin/index.html"
+                );
                 return;
             }
 
@@ -128,3 +136,53 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
+
+
+// ==========================================
+// API BASE RESOLUTION
+// ==========================================
+//
+// The site runs in three environments, and each needs a different
+// base URL for the API:
+//
+//   1. Live (Netlify)  → window.ADMIN_API_BASE points at Render
+//   2. Local dev       → API runs on :5000, site on :5500/:3000/etc.
+//   3. Same-origin     → production backend serves the site too (unused
+//                        here but kept for future-proofing)
+//
+// The script tag in index.html sets window.ADMIN_API_BASE:
+//
+//     <script>
+//         window.ADMIN_API_BASE = "https://carpentry-web.onrender.com";
+//     </script>
+//
+// This helper prefers that value; falls back to :5000 when the browser
+// is on a dev port; and returns "" (same-origin) otherwise.
+
+function getApiBase() {
+
+    // 1. Explicit override wins — this is what the live site uses.
+    if (typeof window !== "undefined" && window.ADMIN_API_BASE) {
+        return String(window.ADMIN_API_BASE).replace(/\/+$/, "");
+    }
+
+    // 2. Local development — site is on one port, Express on 5000.
+    if (typeof window !== "undefined" && window.location) {
+
+        const port = window.location.port;
+
+        const isDevPort =
+            port &&
+            port !== "5000" &&   // already on Express
+            port !== "80" &&     // plain http
+            port !== "443";      // https
+
+        if (isDevPort) {
+            return `${window.location.protocol}//${window.location.hostname}:5000`;
+        }
+    }
+
+    // 3. Same-origin fallback — no base means the API is on the same
+    //    domain as the site.
+    return "";
+}
