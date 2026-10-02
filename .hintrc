@@ -12,6 +12,7 @@
           "video[disableremoteplayback]"
         ]
       }
-    ]
+    ],
+    "no-inline-styles": "off"
   }
 }

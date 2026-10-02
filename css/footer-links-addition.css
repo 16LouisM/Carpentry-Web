@@ -1,0 +1,36 @@
+/* FOOTER INFORMATION LINKS */
+
+.footer-links {
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.footer-links h3 {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--umber-mid, #a1876b);
+    margin-bottom: 1rem;
+}
+
+.footer-link-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem 1.5rem;
+}
+
+.footer-link-grid a {
+    color: inherit;
+    text-decoration: none;
+    font-size: 0.85rem;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+.footer-link-grid a:hover,
+.footer-link-grid a:focus-visible {
+    opacity: 1;
+    text-decoration: underline;
+}

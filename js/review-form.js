@@ -1,0 +1,181 @@
+// js/review-form.js
+
+import { createTestimonial } from "./firebase-firestore.js";
+import { API_BASE } from "./api-base.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const form = document.getElementById("reviewForm");
+
+    if (!form) {
+        return;
+    }
+
+    const starButtons = document.querySelectorAll("#starRatingInput .star-btn");
+    const ratingInput = document.getElementById("reviewRating");
+    const messageEl = document.getElementById("reviewFormMessage");
+    const successEl = document.getElementById("reviewFormSuccess");
+    const submitBtn = document.getElementById("reviewSubmitBtn");
+    const honeypot = document.getElementById("reviewHoneypot");
+    const reviewTextEl = document.getElementById("reviewText");
+    const charCountEl = document.getElementById("reviewCharCount");
+
+    let currentRating = 0;
+
+
+    // ==========================================
+    // CHARACTER COUNTER
+    // ==========================================
+
+    const REVIEW_MAX_LENGTH = 150;
+
+    if (reviewTextEl && charCountEl) {
+
+        const updateCharCount = () => {
+            charCountEl.textContent = `${reviewTextEl.value.length} / ${REVIEW_MAX_LENGTH}`;
+        };
+
+        reviewTextEl.addEventListener("input", updateCharCount);
+        updateCharCount();
+    }
+
+
+    // ==========================================
+    // STAR RATING WIDGET
+    // ==========================================
+
+    function paintStars(value) {
+
+        starButtons.forEach((btn) => {
+
+            const starValue = Number(btn.dataset.value);
+
+            btn.classList.toggle("filled", starValue <= value);
+        });
+    }
+
+    paintStars(0);
+
+    starButtons.forEach((btn) => {
+
+        btn.addEventListener("click", () => {
+
+            currentRating = Number(btn.dataset.value);
+            ratingInput.value = currentRating;
+
+            paintStars(currentRating);
+        });
+
+        btn.addEventListener("mouseenter", () => {
+            paintStars(Number(btn.dataset.value));
+        });
+
+        btn.addEventListener("mouseleave", () => {
+            paintStars(currentRating);
+        });
+
+    });
+
+
+    // ==========================================
+    // SUBMIT
+    // ==========================================
+
+    form.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        // Honeypot: a real visitor never fills this hidden field.
+        if (honeypot && honeypot.value.trim() !== "") {
+            return;
+        }
+
+        const clientName = document.getElementById("reviewerName").value.trim();
+        const review = document.getElementById("reviewText").value
+            .trim()
+            .slice(0, REVIEW_MAX_LENGTH);
+
+        const locationEl = document.getElementById("reviewerLocation");
+        const location = locationEl ? locationEl.value.trim() : "";
+
+        const roleEl = document.getElementById("reviewerRole");
+        const role = roleEl ? roleEl.value.trim() : "";
+
+        const rating = currentRating;
+
+        if (!clientName || !review) {
+            messageEl.textContent = "Please fill in your name and review.";
+            return;
+        }
+
+        if (!rating) {
+            messageEl.textContent = "Please select a star rating.";
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+        messageEl.textContent = "";
+
+        try {
+
+            await createTestimonial({
+                clientName,
+                review,
+                rating,
+                location,
+                role
+            });
+
+            // Best-effort — the review is already safely in Firestore
+            // by this point. If the notification email fails (server
+            // not running, network hiccup, etc.), the visitor's review
+            // still succeeded and should not see an error because of it.
+            fetch(`${API_BASE}/api/notify-review`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ clientName, review, rating, location, role })
+            }).catch((error) => {
+                console.error("Could not send admin notification email:", error);
+            });
+
+            form.style.display = "none";
+
+            if (successEl) {
+                successEl.style.display = "block";
+            }
+
+            // Restore the form after 5 seconds so a visitor can leave
+            // another review without reloading the page.
+            setTimeout(() => {
+
+                if (successEl) {
+                    successEl.style.display = "none";
+                }
+
+                form.style.display = "";
+                form.reset();
+
+                currentRating = 0;
+                ratingInput.value = "";
+                paintStars(0);
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit Review";
+
+            }, 5000);
+
+        } catch (error) {
+
+            console.error("Review submission error:", error);
+
+            messageEl.textContent =
+                "Something went wrong. Please try again.";
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Review";
+        }
+
+    });
+
+});

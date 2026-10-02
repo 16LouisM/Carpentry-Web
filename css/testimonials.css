@@ -1,67 +1,235 @@
 /* TESTIMONIALS */
-        #testimonials {
-            background: var(--parchment);
-        }
-        .testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.4rem;
-        }
-        .testimonial-card {
-            background: var(--paper);
-            padding: 2rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--line);
-            position: relative;
-        }
-        .testimonial-card::before {
-            content: '"';
-            position: absolute;
-            top: 0.3rem;
-            left: 1.4rem;
-            font-size: 4.5rem;
-            color: rgba(184, 124, 76, 0.18);
-            font-family: var(--font-display);
-            line-height: 1;
-            pointer-events: none;
-        }
-        .testimonial-card p {
-            color: var(--umber-mid);
-            font-style: italic;
-            margin-bottom: 1.2rem;
-            position: relative;
-            z-index: 1;
-        }
-        .testimonial-author {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-        .testimonial-avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: var(--radius-sm);
-            background: var(--charcoal);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--brass);
-            font-weight: 600;
-            font-size: 0.85rem;
-            font-family: var(--font-mono);
-        }
-        .testimonial-author strong {
-            display: block;
-            color: var(--charcoal);
-            font-size: 0.95rem;
-            font-family: var(--font-display);
-        }
-        .testimonial-author small {
-            color: var(--umber-mid);
-            font-size: 0.8rem;
-        }
-        .stars {
-            color: var(--oak-deep);
-            letter-spacing: 2px;
-        }
+#testimonials {
+    background: var(--parchment);
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.4rem;
+}
+
+.testimonial-card {
+    background: var(--paper);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--line);
+    position: relative;
+}
+
+.testimonial-card::before {
+    content: '"';
+    position: absolute;
+    top: 0.3rem;
+    left: 1.4rem;
+    font-size: 4.5rem;
+    color: rgba(184, 124, 76, 0.18);
+    font-family: var(--font-display);
+    line-height: 1;
+    pointer-events: none;
+}
+
+.testimonial-card p {
+    color: var(--umber-mid);
+    font-style: italic;
+    margin-bottom: 1.2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.testimonial-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-sm);
+    background: var(--charcoal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brass);
+    font-weight: 600;
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+}
+
+.testimonial-author strong {
+    display: block;
+    color: var(--charcoal);
+    font-size: 0.95rem;
+    font-family: var(--font-display);
+}
+
+.testimonial-author small {
+    color: var(--umber-mid);
+    font-size: 0.8rem;
+}
+
+.stars {
+    color: var(--oak-deep);
+    letter-spacing: 2px;
+}
+
+/* Read-only star display (testimonial cards): outline by
+   default, solid fill only on the stars that count toward the
+   rating. Lucide copies the class from the <i data-lucide>
+   placeholder onto the <svg> it generates, so this matches
+   both the raw placeholder and the rendered icon. */
+.stars i svg,
+.stars svg {
+    fill: none;
+    stroke: currentColor;
+}
+
+.stars i.filled svg,
+.stars svg.filled {
+    fill: currentColor;
+}
+
+/* Interactive star-rating picker (review submission form) */
+.star-rating-input {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.star-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.15rem;
+    color: var(--oak-deep);
+    line-height: 0;
+}
+
+.star-btn svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    transition: fill 0.15s ease;
+}
+
+.star-btn.filled svg {
+    fill: currentColor;
+}
+
+/* =========================================
+   TESTIMONIALS MARQUEE
+   Continuous right-to-left auto-scroll, pauses on hover.
+
+   Seam-free requires three things working together:
+
+   1. NO `gap` on the track. `gap` adds space between items but
+      not after the last one, so one copy's width is short by one
+      gap. When the track translates -50%, it lands half a gap
+      past the start of the second copy — visible snap.
+
+      Instead, every card carries its own `margin-right`. Now one
+      copy's total width (including its trailing margin) is
+      EXACTLY half the row, and -50% lands on a card boundary.
+
+   2. The track must hold TWO identical copies of the cards.
+      The JS in testimonials.js handles this on page load.
+
+   3. Every card must be exactly the same width. A fixed
+      `flex: 0 0 340px` guarantees this regardless of content.
+   ========================================= */
+
+.testimonials-marquee {
+    overflow: hidden;
+    width: 100%;
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 5%,
+        black 95%,
+        transparent
+    );
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 5%,
+        black 95%,
+        transparent
+    );
+}
+
+.testimonials-marquee .testimonials-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;                            /* spacing lives on the cards */
+    width: max-content;
+    animation: testimonials-scroll 32s linear infinite;
+    will-change: transform;            /* promote to its own layer */
+}
+
+.testimonials-marquee:hover .testimonials-grid {
+    animation-play-state: paused;
+}
+
+.testimonials-marquee .testimonial-card {
+    flex: 0 0 340px;
+    width: 340px;
+    margin-right: 1.4rem;              /* trailing margin on EVERY card */
+}
+
+@keyframes testimonials-scroll {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .testimonials-marquee .testimonials-grid {
+        animation: none;
+    }
+}
+
+/* =========================================
+   REVIEW FORM SECTION (side-by-side with image)
+   ========================================= */
+
+.review-section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+    margin-top: 3rem;
+}
+
+#reviewFormSection .form-group input,
+#reviewFormSection .form-group select,
+#reviewFormSection .form-group textarea {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+#reviewFormSection .form-group textarea {
+    min-height: 80px;
+}
+
+#reviewImageWrapper {
+    align-self: stretch;
+    min-height: 300px;
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+}
+
+@media (max-width: 800px) {
+    .review-section-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #reviewImageWrapper {
+        min-height: 200px;
+    }
+}
