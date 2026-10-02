@@ -1,4 +1,7 @@
-/* GALLERY */
+/* =========================================
+   GALLERY
+========================================= */
+
 #gallery {
     background: var(--paper);
 }
@@ -123,4 +126,80 @@
 
 .gallery-lightbox-close:hover {
     background: rgba(255, 255, 255, 0.24);
+}
+
+
+/* =========================================
+   GALLERY MARQUEE
+   Continuous left-to-right auto-scroll, pauses on hover.
+
+   Same seam-free math as the testimonials marquee, just running
+   the other direction:
+
+     • NO `gap` on the track — spacing is a trailing `margin-right`
+       on every card, so one copy's total width is exactly half
+       the row and `-50%` lands on a card boundary.
+
+     • The track must hold TWO identical copies. The JS handles
+       the duplication.
+
+     • Every item is a fixed width so `flex: 0 0 Npx` guarantees
+       uniform sizing regardless of image dimensions.
+========================================= */
+
+.gallery-marquee {
+    overflow: hidden;
+    width: 100%;
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 5%,
+        black 95%,
+        transparent
+    );
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 5%,
+        black 95%,
+        transparent
+    );
+}
+
+.gallery-marquee .gallery-grid {
+    display: flex;                     /* overrides the auto-fit grid */
+    flex-wrap: nowrap;
+    gap: 0;                            /* spacing lives on the items */
+    width: max-content;
+    grid-template-columns: none;       /* neutralise the grid rules */
+    animation: gallery-scroll 40s linear infinite;
+    will-change: transform;
+}
+
+.gallery-marquee:hover .gallery-grid {
+    animation-play-state: paused;
+}
+
+.gallery-marquee .gallery-item {
+    flex: 0 0 240px;
+    width: 240px;
+    margin-right: 0.9rem;              /* trailing margin on EVERY item */
+}
+
+/* Left-to-right: the track slides toward +X. Starting at -50%
+   puts the second copy in view, and animating back to 0 slides
+   the first copy in from the left while the second exits right. */
+@keyframes gallery-scroll {
+    from {
+        transform: translateX(-50%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gallery-marquee .gallery-grid {
+        animation: none;
+    }
 }
