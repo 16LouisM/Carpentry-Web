@@ -1,6 +1,7 @@
 // js/review-form.js
 
 import { createTestimonial } from "./firebase-firestore.js";
+import { API_BASE } from "./api-base.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -103,6 +104,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 rating,
                 location,
                 role
+            });
+
+            // Best-effort — the review is already safely in Firestore
+            // by this point. If the notification email fails (server
+            // not running, network hiccup, etc.), the visitor's review
+            // still succeeded and should not see an error because of it.
+            fetch(`${API_BASE}/api/notify-review`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ clientName, review, rating, location, role })
+            }).catch((error) => {
+                console.error("Could not send admin notification email:", error);
             });
 
             form.style.display = "none";

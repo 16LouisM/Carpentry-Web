@@ -346,6 +346,127 @@ app.post("/api/contact", async (req, res) => {
 
 
 // =====================================================
+// NEW REVIEW NOTIFICATION  (public — called after a review
+// has already been written to Firestore by the browser)
+// =====================================================
+//
+// This is intentionally unauthenticated, same as /api/contact — any
+// visitor can call it. That means someone could, in principle, call
+// it directly without having actually submitted a real review, and
+// get a fake "new review" email sent. The review itself can't be
+// forged this way (Firestore's own rules protect that), only the
+// notification email could be spoofed/spammed. Basic field validation
+// below is the only guard for now; revisit if this ever gets abused.
+
+app.post("/api/notify-review", async (req, res) => {
+
+    try {
+
+        const {
+            clientName,
+            review,
+            rating,
+            location,
+            role
+        } = req.body || {};
+
+        if (!clientName || !review || !rating) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Missing review details."
+            });
+
+        }
+
+        function escapeHtml(value) {
+
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        const safeName = escapeHtml(clientName);
+
+        const safeReview = escapeHtml(review).replaceAll("\n", "<br>");
+
+        const safeLocation = escapeHtml(location || "Not provided");
+
+        const safeRole = escapeHtml(role || "Not specified");
+
+        const ratingNumber = Math.max(0, Math.min(5, Number(rating) || 0));
+
+        const stars = "★".repeat(ratingNumber);
+
+        await transporter.sendMail({
+
+            from: process.env.EMAIL_USER,
+
+            to: process.env.BUSINESS_EMAIL,
+
+            subject: `New Client Review — ${clientName} (${stars || "no rating"})`,
+
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <body style="
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                ">
+                    <h2>New Client Review Submitted</h2>
+
+                    <p><strong>Name:</strong> ${safeName}</p>
+                    <p><strong>Role:</strong> ${safeRole}</p>
+                    <p><strong>Location:</strong> ${safeLocation}</p>
+                    <p><strong>Rating:</strong> ${stars} (${ratingNumber}/5)</p>
+
+                    <p><strong>Review:</strong></p>
+                    <p>${safeReview}</p>
+
+                    <hr>
+
+                    <p>
+                        This review is currently <strong>pending</strong>
+                        and will not appear on your website until you
+                        approve it from the admin dashboard.
+                    </p>
+                </body>
+                </html>
+            `
+
+        });
+
+        console.log(
+            `✓ Review notification email sent for ${clientName}`
+        );
+
+        return res.status(200).json({ success: true });
+
+    } catch (error) {
+
+        console.error(
+            "✖ Review notification email error:",
+            error
+        );
+
+        // Non-fatal from the client's point of view — the review
+        // itself is already safely stored in Firestore by the time
+        // this runs, regardless of whether this email succeeds.
+        return res.status(500).json({
+            success: false,
+            message: "Could not send notification email."
+        });
+
+    }
+
+});
+
+
+// =====================================================
 // CLOUDINARY IMAGE UPLOAD API  (admin-only)
 // =====================================================
 
