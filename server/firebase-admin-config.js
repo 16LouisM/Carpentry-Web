@@ -14,41 +14,21 @@ const { getFirestore } = require("firebase-admin/firestore");
 //
 // Two ways to provide it, checked in this order:
 //
-// 1. FIREBASE_SERVICE_ACCOUNT_PATH — path to the raw downloaded .json
-//    file. Easiest for local development: no manual flattening, no
-//    quoting headaches. Relative paths are resolved from this file's
-//    folder (server/).
+// 1. FIREBASE_SERVICE_ACCOUNT — the JSON as a single-line or
+//    multi-line string. This is the option Render/Vercel use,
+//    because they have no local file system we control. Checked
+//    FIRST so a stray FIREBASE_SERVICE_ACCOUNT_PATH from a local
+//    .env file can't shadow a properly-configured cloud env var.
 //
-// 2. FIREBASE_SERVICE_ACCOUNT — the JSON as a single-line string.
-//    Use this on Vercel, where you paste the value into a dashboard
-//    text field rather than editing a .env file by hand, so the
-//    line-break problem doesn't come up.
+// 2. FIREBASE_SERVICE_ACCOUNT_PATH — path to the raw downloaded
+//    .json file. Convenient for local development.
+//
+// Either way, if the first option fails, the second is tried. Only
+// if BOTH are missing or broken do we give up.
 
 function loadServiceAccount() {
 
-    const keyPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-
-    if (keyPath) {
-
-        const resolved = path.isAbsolute(keyPath)
-            ? keyPath
-            : path.join(__dirname, keyPath);
-
-        try {
-
-            const raw = fs.readFileSync(resolved, "utf8");
-            return JSON.parse(raw);
-
-        } catch (error) {
-
-            console.error(
-                `✖ Could not read service account file at ${resolved}:`,
-                error.message
-            );
-
-            return {};
-        }
-    }
+    // --- Option 1: JSON string (Render / Vercel) ---
 
     const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
 
@@ -56,7 +36,15 @@ function loadServiceAccount() {
 
         try {
 
-            return JSON.parse(raw);
+            const parsed = JSON.parse(raw);
+
+            if (parsed && parsed.project_id) {
+                return parsed;
+            }
+
+            console.error(
+                "✖ FIREBASE_SERVICE_ACCOUNT parsed but has no project_id field."
+            );
 
         } catch (error) {
 
@@ -64,12 +52,8 @@ function loadServiceAccount() {
                 "✖ FIREBASE_SERVICE_ACCOUNT is not valid JSON:",
                 error.message
             );
-
-            return {};
         }
     }
-
-    return {};
 }
 
 const serviceAccount = loadServiceAccount();
@@ -96,7 +80,7 @@ if (!getApps().length) {
         console.error(
             "✖ No Firebase service account found — set either " +
             "FIREBASE_SERVICE_ACCOUNT_PATH (local file) or " +
-            "FIREBASE_SERVICE_ACCOUNT (JSON string) in server/.env. " +
+            "FIREBASE_SERVICE_ACCOUNT (JSON string) in the environment. " +
             "Admin-only routes will reject every request until this is set."
         );
     }
@@ -110,9 +94,6 @@ if (!getApps().length) {
 // ==========================================
 // EXPORTS
 // ==========================================
-//
-// Same call shape as before (admin.auth(), admin.firestore()), so
-// server.js's requireAdmin middleware doesn't need any changes.
 
 module.exports = {
     auth: () => getAuth(app),
