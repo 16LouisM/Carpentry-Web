@@ -17,8 +17,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const successEl = document.getElementById("reviewFormSuccess");
     const submitBtn = document.getElementById("reviewSubmitBtn");
     const honeypot = document.getElementById("reviewHoneypot");
+    const reviewTextEl = document.getElementById("reviewText");
+    const charCountEl = document.getElementById("reviewCharCount");
 
     let currentRating = 0;
+
+
+    // ==========================================
+    // CHARACTER COUNTER
+    // ==========================================
+
+    const REVIEW_MAX_LENGTH = 150;
+
+    if (reviewTextEl && charCountEl) {
+
+        const updateCharCount = () => {
+            charCountEl.textContent = `${reviewTextEl.value.length} / ${REVIEW_MAX_LENGTH}`;
+        };
+
+        reviewTextEl.addEventListener("input", updateCharCount);
+        updateCharCount();
+    }
 
 
     // ==========================================
@@ -72,7 +91,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const clientName = document.getElementById("reviewerName").value.trim();
-        const review = document.getElementById("reviewText").value.trim();
+        const review = document.getElementById("reviewText").value
+            .trim()
+            .slice(0, REVIEW_MAX_LENGTH);
 
         const locationEl = document.getElementById("reviewerLocation");
         const location = locationEl ? locationEl.value.trim() : "";
