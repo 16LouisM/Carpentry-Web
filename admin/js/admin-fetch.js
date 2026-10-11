@@ -3,9 +3,12 @@
 // A small wrapper around fetch() for calling admin-only API routes
 // (like /api/admin/images). It attaches the signed-in admin's current
 // Firebase ID token as a Bearer header, which server.js's requireAdmin
-// middleware checks.
+// middleware checks, and prefixes relative paths with API_BASE so
+// this works whether the admin dashboard and the backend share one
+// origin or live on two different domains (e.g. admin on Vercel,
+// server on Render).
 //
-// Usage, once you build the image-upload UI:
+// Usage:
 //
 //   import { adminFetch } from "./admin-fetch.js";
 //
@@ -16,10 +19,14 @@
 //       method: "POST",
 //       body: formData
 //   });
+//
+// Existing calls that already pass a relative path like "/api/admin/images"
+// need no changes — the prefixing happens here, once, centrally.
 
 import { auth } from "./firebase-auth.js";
+import { API_BASE } from "../../js/api-base.js";
 
-export async function adminFetch(url, options = {}) {
+export async function adminFetch(path, options = {}) {
 
     const user = auth.currentUser;
 
@@ -32,6 +39,8 @@ export async function adminFetch(url, options = {}) {
 
     const headers = new Headers(options.headers || {});
     headers.set("Authorization", `Bearer ${idToken}`);
+
+    const url = /^https?:\/\//.test(path) ? path : `${API_BASE}${path}`;
 
     return fetch(url, {
         ...options,

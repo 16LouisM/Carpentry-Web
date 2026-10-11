@@ -1,7 +1,6 @@
 // server/server.js
 
 const express = require("express");
-const nodemailer = require("nodemailer");
 const cors = require("cors");
 const path = require("path");
 const multer = require("multer");
@@ -138,27 +137,86 @@ async function requireAdmin(req, res, next) {
 
 
 // =====================================================
-// EMAIL CONFIGURATION
+// EMAIL  (Resend, over HTTPS)
 // =====================================================
+//
+// Why not Nodemailer + Gmail SMTP: Render's free web services block
+// all outbound traffic to SMTP ports 25, 465 and 587, so
+// smtp.gmail.com is simply unreachable once this is deployed there.
+// Resend's HTTP API uses port 443, which is not blocked.
+//
+// Required environment variables (set them in Render's Environment tab):
+//   RESEND_API_KEY   - from resend.com -> API Keys
+//   BUSINESS_EMAIL   - where notifications are delivered. Until you
+//                      verify a domain in Resend, this MUST be the same
+//                      address you signed up to Resend with.
+// Optional:
+//   EMAIL_FROM       - e.g. "Modjadji Projects <enquiries@yourdomain.co.za>"
+//                      once your domain is verified. Defaults to
+//                      Resend's test sender below.
 
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
-// Check email connection when the server starts, so a bad
-// EMAIL_USER/EMAIL_PASS shows up in the logs immediately
-transporter.verify((error, success) => {
-    if (error) {
-        console.error("✖ Email server connection failed:");
-        console.error(error.message);
-    } else {
-        console.log("✓ Email server is ready");
+const EMAIL_FROM =
+    process.env.EMAIL_FROM ||
+    "Modjadji Projects <onboarding@resend.dev>";
+
+async function sendEmail({ to, replyTo, subject, html }) {
+
+    if (!RESEND_API_KEY) {
+        throw new Error("RESEND_API_KEY is not set on this server.");
     }
-});
+
+    if (!to) {
+        throw new Error("BUSINESS_EMAIL is not set on this server.");
+    }
+
+    const response = await fetch("https://api.resend.com/emails", {
+
+        method: "POST",
+
+        headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            from: EMAIL_FROM,
+            to: [to],
+            subject,
+            html,
+            ...(replyTo ? { reply_to: replyTo } : {})
+        })
+
+    });
+
+    if (!response.ok) {
+
+        let detail = "";
+
+        try {
+            const body = await response.json();
+            detail = body.message || JSON.stringify(body);
+        } catch (parseError) {
+            detail = await response.text().catch(() => "");
+        }
+
+        // This message is what ends up in Render's logs, so it needs
+        // to say what actually went wrong, not just "failed".
+        throw new Error(`Resend API error ${response.status}: ${detail}`);
+    }
+
+    return response.json();
+}
+
+if (RESEND_API_KEY) {
+    console.log("✓ Email provider configured (Resend)");
+} else {
+    console.error(
+        "✖ RESEND_API_KEY is not set — contact form and review " +
+        "notification emails will fail until it is."
+    );
+}
 
 
 // =====================================================
@@ -278,9 +336,7 @@ app.post("/api/contact", async (req, res) => {
         // SEND EMAIL
         // ---------------------------------------------
 
-        await transporter.sendMail({
-
-            from: process.env.EMAIL_USER,
+        await sendEmail({
 
             to: process.env.BUSINESS_EMAIL,
 
@@ -401,9 +457,7 @@ app.post("/api/notify-review", async (req, res) => {
 
         const stars = "★".repeat(ratingNumber);
 
-        await transporter.sendMail({
-
-            from: process.env.EMAIL_USER,
+        await sendEmail({
 
             to: process.env.BUSINESS_EMAIL,
 
