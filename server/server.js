@@ -226,7 +226,15 @@ if (RESEND_API_KEY) {
 app.get("/api/health", (req, res) => {
     res.json({
         success: true,
-        message: "Modjadji Projects server is running."
+        message: "Modjadji Projects server is running.",
+
+        // Safe to expose: only whether things are set, never the values.
+        // "emailProvider" being present at all also proves the deployed
+        // code is the Resend version, not the old SMTP one.
+        emailProvider: "resend",
+        resendApiKeySet: Boolean(process.env.RESEND_API_KEY),
+        businessEmailSet: Boolean(process.env.BUSINESS_EMAIL),
+        emailFrom: EMAIL_FROM
     });
 });
 
